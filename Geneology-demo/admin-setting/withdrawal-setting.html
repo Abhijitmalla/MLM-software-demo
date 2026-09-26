@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Withdrawal Settings · Admin Panel</title>
+
+  <!-- Tailwind + fonts + icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#0e4a3d',
+              light: '#b6f059',
+              bg: '#f4f6f8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+
+    #sidebar nav .sidebar-dropdown>button { padding-top: .7rem; padding-bottom: .7rem; font-size: 1rem; }
+    #sidebar nav .sidebar-dropdown>button>div>i,
+    #sidebar nav .sidebar-dropdown>button>i { width: 1.4rem; height: 1.4rem; }
+    #sidebar nav .sidebar-dropdown>div { font-size: .875rem; }
+
+    /* ---- enhanced card hover & glass effect ---- */
+    .stat-card {
+      transition: all 0.25s ease;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(226, 232, 240, 0.5);
+    }
+    .dark .stat-card {
+      background: rgba(30, 41, 59, 0.7);
+      border-color: rgba(51, 65, 85, 0.5);
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.15);
+      border-color: #b6f059;
+    }
+    .dark .stat-card:hover {
+      box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.5);
+      border-color: #b6f059;
+    }
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(14, 74, 61, 0.08);
+      color: #0e4a3d;
+    }
+    .dark .stat-icon {
+      background: rgba(182, 240, 89, 0.12);
+      color: #b6f059;
+    }
+
+    /* Form inputs */
+    .form-input {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      background: white;
+      color: #1e293b;
+      outline: none;
+      transition: border 0.15s;
+      width: 100%;
+      height: 38px;
+    }
+    .form-input:focus {
+      border-color: #0e4a3d;
+      box-shadow: 0 0 0 2px rgba(14, 74, 61, 0.15);
+    }
+    .dark .form-input {
+      background: #1e293b;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    .dark .form-input:focus {
+      border-color: #b6f059;
+      box-shadow: 0 0 0 2px rgba(182, 240, 89, 0.15);
+    }
+
+    /* Form container */
+    .form-container {
+      background: #0e4a3d; /* brand dark */
+      border-radius: 8px;
+      padding: 1.5rem;
+      border: 1px solid #0b3d32;
+    }
+    .dark .form-container {
+      background: #0b3d32;
+      border-color: #0e4a3d;
+    }
+
+    /* Form labels */
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #ffffff;
+      margin-bottom: 0.35rem;
+    }
+    .dark .form-label {
+      color: #e2e8f0;
+    }
+
+    /* Toggle switch (Active/Inactive) */
+    .toggle-status {
+      display: inline-flex;
+      align-items: center;
+      background: #6cbf3f;
+      border-radius: 4px;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+      position: relative;
+      min-width: 80px;
+      height: 32px;
+      transition: background 0.2s;
+    }
+    .toggle-status .toggle-text {
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+      transition: opacity 0.2s;
+    }
+    .toggle-status .toggle-knob {
+      position: absolute;
+      right: 2px;
+      top: 2px;
+      width: 28px;
+      height: 28px;
+      background: white;
+      border-radius: 3px;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle-status.inactive {
+      background: #dc3545;
+    }
+    .toggle-status.inactive .toggle-text {
+      opacity: 0;
+    }
+    .toggle-status.inactive .toggle-knob {
+      transform: translateX(-44px);
+    }
+
+    /* Submit & Cancel buttons */
+    .btn-submit {
+      background: #17a2b8;
+      color: white;
+      font-size: 0.85rem;
+      padding: 0.45rem 1.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      transition: background 0.15s;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-submit:hover { background: #138496; }
+    .dark .btn-submit { background: #0e7490; }
+    .dark .btn-submit:hover { background: #0b5e73; }
+
+    .btn-cancel {
+      background: #dc3545;
+      color: white;
+      font-size: 0.85rem;
+      padding: 0.45rem 1.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      transition: background 0.15s;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-cancel:hover { background: #c82333; }
+    .dark .btn-cancel { background: #b91c1c; }
+    .dark .btn-cancel:hover { background: #991b1b; }
+  </style>
+</head>
+
+<body class="bg-[#f4f6f8] dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex transition-colors duration-200">
+
+  <!-- ========== SIDEBAR (same as index.html) ========== -->
+ <aside id="sidebar" class="w-80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-slate-200/60 dark:border-slate-700/60 flex flex-col shrink-0 h-screen sticky top-0 custom-scrollbar overflow-y-auto transition-all duration-300 z-20">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3 sidebar-text">
+        <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
+          <i data-lucide="circle-dot" class="w-5 h-5"></i>
+        </div>
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Admin Pannel Demo</span>
+      </div>
+    </div>
+
+    <nav class="px-4 pb-6 space-y-6">
+      <div>
+        <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Dashboards</p>
+        <div class="space-y-1">
+          <!-- Dashboard -->
+          <a href="../index.html" class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-brand-dark text-white font-medium text-base transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-light shrink-0"></i>
+              <span class="sidebar-text">Dashboard</span>
+            </div>
+          </a>
+
+          <!-- Associate -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-associate')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Associate</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-associate" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-associate" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../Associate/all-associate.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">All Associate</a>
+              <a href="../Associate/active-associate.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Active Associate</a>
+              <a href="../Associate/inactive-associate.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inactive Associate</a>
+              <a href="../Associate/activation-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Activation History</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-ads')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">KYC</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-ads" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-ads" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../kyc/pending-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Request</a>
+              <a href="../kyc/accepted-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Request</a>
+              <a href="../kyc/rejected-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Request</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-social')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="share-2" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Report</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-social" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-social" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../report/autopool-table.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Autopool Table</a>
+              <a href="../report/matrix-table.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Matrix Table</a>
+              <a href="../report/monthly-charge-report.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Monthly Charge Report</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-payment')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="credit-card" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Fund Transaction</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-payment" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-payment" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../fund-transaction/fund-transaction.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transaction</a>
+              <a href="../fund-transaction/admin-credit-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Admin Credit History</a>
+              <a href="../fund-transaction/admin-debit-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Admin Debit History</a>
+            </div>
+          </div>
+
+          <!-- Generated Payout -->
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='../generate-payout.html'" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="wallet" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generated Payout</span>
+              </div>
+            </button>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-kyc')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="shield-check" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Withdrawal History</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-kyc" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-kyc" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../withdrawal-request/processing-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Processing Request</a>
+              <a href="../withdrawal-request/accepted-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Request</a>
+              <a href="../withdrawal-request/rejected-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Request</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Product Sell</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../product-sell/import-order.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Import Order</a>
+              <a href="../product-sell/imported-ordered-product.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Imported Ordered Product</a>
+              <a href="../product-sell/product-billing.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Product Billing</a>
+              <a href="../product-sell/billing-details.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Billing Details</a>
+              <a href="../product-sell/sold-product-report.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Sold Products Report</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-fund-request')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="send" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Notification</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-fund-request" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-fund-request" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../notification/add-model.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Model/Banner News</a>
+              <a href="../notification/add-notification.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Notification</a>
+              <a href="../notification/add-qr-code.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add QR Code</a>
+              <a href="../notification/manage-gallery.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Manage Gallery</a>
+            </div>
+          </div>
+
+          <!-- Admin Settings -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-admin-setting')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Admin Settings</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-admin-setting" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-admin-setting" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../admin-setting/withdrawal-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Withdrawal Settings</a>
+              <a href="../admin-setting/youtube-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Youtube Link Setting</a>
+              <a href="../admin-setting/onetime-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Onetime Setting</a>
+              <a href="../admin-setting/autopool-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Autopool Setting</a>
+            </div>
+          </div>
+
+          <!-- Support -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-support')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="headphones" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Support</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-support" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-support" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../support/inbox.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inbox</a>
+              <a href="../support/outbox.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Outbox</a>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='../password.html'" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="key" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Password</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Logout -->
+          <div class="sidebar-dropdown">
+            <button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="log-out" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Logout</span>
+              </div>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- header (same as index.html) -->
+    <header class="h-16 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-b border-slate-200/60 dark:border-slate-700/60 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
+      <div class="flex items-center space-x-4">
+        <button id="sidebarToggle" onclick="toggleSidebar()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i data-lucide="sidebar" class="w-5 h-5"></i></button>
+        <div class="relative w-64 hidden sm:block"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-1.5 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light"></div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i></button>
+        <div class="flex items-center space-x-1 cursor-pointer"><span class="text-xl">🇬🇧</span></div>
+        <button class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg relative transition"><i data-lucide="bell" class="w-5 h-5"></i><span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">6</span></button>
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover cursor-pointer">
+      </div>
+    </header>
+
+    <!-- ============ MAIN CONTENT – WITHDRAWAL SETTINGS ============ -->
+    <main class="p-6 space-y-6 overflow-y-auto">
+
+      <!-- Page title -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Withdrawal Settings</h1>
+        <div class="flex items-center space-x-2 text-slate-400">
+          <i data-lucide="home" class="w-4 h-4"></i>
+          <span class="text-sm">/</span>
+          <span class="text-sm font-medium text-slate-600 dark:text-slate-300">Admin Settings</span>
+          <span class="text-sm">/</span>
+          <span class="text-sm font-medium text-brand-dark dark:text-brand-light">Withdrawal Settings</span>
+        </div>
+      </div>
+
+      <!-- Form Container -->
+      <div class="form-container">
+        <div class="space-y-6">
+          <!-- Button Status -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <label class="form-label md:text-right">Button Status</label>
+            <div class="md:col-span-2">
+              <div class="toggle-status" onclick="this.classList.toggle('inactive')">
+                <span class="toggle-text">Active</span>
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+          </div>
+          <!-- TDS+Admin Charge -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <label class="form-label md:text-right">TDS+Admin Charge</label>
+            <div class="md:col-span-2">
+              <input type="text" class="form-input" value="10" />
+            </div>
+          </div>
+          <!-- Direct Needed -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <label class="form-label md:text-right">Direct Needed</label>
+            <div class="md:col-span-2">
+              <input type="text" class="form-input" value="10" />
+            </div>
+          </div>
+          <!-- Team Needed -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <label class="form-label md:text-right">Team Needed</label>
+            <div class="md:col-span-2">
+              <input type="text" class="form-input" value="0" />
+            </div>
+          </div>
+          <!-- Self Business -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <label class="form-label md:text-right">Self Business</label>
+            <div class="md:col-span-2">
+              <input type="text" class="form-input" value="500" />
+            </div>
+          </div>
+          <!-- Min Pay -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <label class="form-label md:text-right">Min Pay</label>
+            <div class="md:col-span-2">
+              <input type="text" class="form-input" value="500" />
+            </div>
+          </div>
+          <!-- Max Pay -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <label class="form-label md:text-right">Max Pay</label>
+            <div class="md:col-span-2">
+              <input type="text" class="form-input" value="5000.00" />
+            </div>
+          </div>
+          <!-- Activation Point -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <label class="form-label md:text-right">Activation Point</label>
+            <div class="md:col-span-2">
+              <input type="text" class="form-input" value="50" />
+            </div>
+          </div>
+        </div>
+        <!-- Form Buttons -->
+        <div class="flex justify-center gap-4 mt-8">
+          <button class="btn-submit">
+            <i data-lucide="save" class="w-4 h-4"></i> Submit
+          </button>
+          <button class="btn-cancel">
+            <i data-lucide="x-circle" class="w-4 h-4"></i> Cancel
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    lucide.createIcons();
+
+    function toggleDropdown(id) {
+      const targetMenu = document.getElementById(id);
+      const targetIcon = document.getElementById('icon-' + id);
+      document.querySelectorAll('.sidebar-dropdown > div').forEach(el => {
+        if (el.id !== id && !el.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          const otherIcon = document.getElementById('icon-' + el.id);
+          if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+        }
+      });
+      if (targetMenu.classList.contains('hidden')) {
+        targetMenu.classList.remove('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(180deg)';
+      } else {
+        targetMenu.classList.add('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    let isSidebarCollapsed = false;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const textElements = document.querySelectorAll('.sidebar-text');
+      isSidebarCollapsed = !isSidebarCollapsed;
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-20');
+        textElements.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-80');
+        textElements.forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      const themeIcon = document.getElementById('themeIcon');
+      if (isDark) themeIcon.setAttribute('data-lucide', 'sun');
+      else themeIcon.setAttribute('data-lucide', 'moon');
+      lucide.createIcons();
+    }
+  </script>
+
+</body>
+</html>

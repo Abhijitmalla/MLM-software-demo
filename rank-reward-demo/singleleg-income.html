@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SingleLeg Income · Rank & Reward Demo</title>
+
+  <!-- Tailwind + fonts + icons + DataTables -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- DataTables CSS + JS (via CDN) -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+  <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#0e4a3d', // Sidebar active green
+              light: '#b6f059', // Accent light green
+              bg: '#f4f6f8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Sidebar Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    
+    /* Sidebar specific spacing */
+    #sidebar nav .sidebar-dropdown>button { padding-top: .7rem; padding-bottom: .7rem; font-size: 1rem; }
+    #sidebar nav .sidebar-dropdown>button>div>i,
+    #sidebar nav .sidebar-dropdown>button>i { width: 1.4rem; height: 1.4rem; }
+    #sidebar nav .sidebar-dropdown>div { font-size: .875rem; }
+
+    /* ---- Table Styling (Dark Green Header from Sidebar) ---- */
+    table.dataTable thead th {
+      background: #0e4a3d; /* Dark green from sidebar */
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 12px 10px;
+      border-bottom: none;
+      white-space: nowrap;
+      text-align: center;
+      vertical-align: middle;
+    }
+    /* Add sort icons in white */
+    table.dataTable thead th.sorting:after,
+    table.dataTable thead th.sorting_asc:after,
+    table.dataTable thead th.sorting_desc:after {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    table.dataTable tbody td {
+      padding: 12px 10px;
+      font-size: 0.85rem;
+      color: #334155;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .dark table.dataTable tbody td {
+      color: #cbd5e1;
+      border-bottom-color: #334155;
+    }
+    table.dataTable tbody tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+    .dark table.dataTable tbody tr:nth-child(even) {
+      background-color: #1e293b;
+    }
+    table.dataTable tbody tr:hover {
+      background-color: #f1f5f9;
+    }
+    .dark table.dataTable tbody tr:hover {
+      background-color: #334155;
+    }
+    
+    /* DataTables wrapper overrides */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      color: #475569;
+    }
+    .dark .dataTables_wrapper .dataTables_length,
+    .dark .dataTables_wrapper .dataTables_filter {
+      color: #cbd5e1;
+    }
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 0.35rem 0.75rem;
+      background: white;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .dataTables_wrapper .dataTables_length select:focus,
+    .dataTables_wrapper .dataTables_filter input:focus {
+      border-color: #0e4a3d;
+    }
+    .dark .dataTables_wrapper .dataTables_length select,
+    .dark .dataTables_wrapper .dataTables_filter input {
+      background: #1e293b;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+    .dark .dataTables_wrapper .dataTables_length select:focus,
+    .dark .dataTables_wrapper .dataTables_filter input:focus {
+      border-color: #b6f059;
+    }
+    
+    .dataTables_wrapper .dataTables_info {
+      font-size: 0.85rem;
+      color: #64748b;
+      padding-top: 1rem;
+    }
+    .dark .dataTables_wrapper .dataTables_info {
+      color: #94a3b8;
+    }
+    .dataTables_wrapper .dataTables_paginate {
+      padding-top: 1rem;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      border-radius: 4px !important;
+      border: 1px solid transparent !important;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.8rem !important;
+      margin: 0 2px;
+      background: transparent;
+      color: #475569;
+    }
+    .dark .dataTables_wrapper .dataTables_paginate .paginate_button {
+      color: #cbd5e1;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: #0e4a3d !important; /* Dark green */
+      color: white !important;
+      border-color: #0e4a3d !important;
+    }
+    .dark .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: #0e4a3d !important;
+      color: white !important;
+      border-color: #0e4a3d !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background: #e2e8f0 !important;
+      border-color: #cbd5e1 !important;
+    }
+    .dark .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background: #334155 !important;
+      border-color: #475569 !important;
+    }
+
+    /* Card Title Bar specific */
+    .card-title-bar {
+      border-bottom: 2px solid #0e4a3d; /* Dark green */
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Table scroll */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #singlelegIncomeTable {
+      width: 100% !important;
+      min-width: 800px;
+    }
+  </style>
+</head>
+
+<body class="bg-[#f4f6f8] dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex transition-colors duration-200">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside id="sidebar" class="w-80 bg-white dark:bg-slate-800 border-r border-slate-200/60 dark:border-slate-700/60 flex flex-col shrink-0 h-screen sticky top-0 custom-scrollbar overflow-y-auto transition-all duration-300 z-20">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3 sidebar-text">
+        <!-- Logo Icon -->
+        <div class="w-10 h-10 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
+          <i data-lucide="circle-dot" class="w-6 h-6"></i>
+        </div>
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Rank & Reward Demo</span>
+      </div>
+    </div>
+
+    <nav class="px-4 pb-6 space-y-6">
+      <div>
+        <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Dashboards</p>
+        <div class="space-y-1">
+
+          <!-- Dashboard -->
+          <a href="./index.html" class="flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-base font-medium transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="bar-chart-2" class="w-5 h-5 shrink-0"></i>
+              <span class="sidebar-text">Dashboard</span>
+            </div>
+          </a>
+
+          <!-- Associate -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-associate')" class="w-full flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-base font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-5 h-5 shrink-0"></i>
+                <span class="sidebar-text">Associate</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-associate" class="w-5 h-5 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-associate" class="hidden pl-10 pr-3 py-1 space-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./associate/view-associates.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">View Associates</a>
+              <a href="./associate/edit-details.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Edit Details</a>
+              <a href="./associate/associate-details.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Associate Details</a>
+            </div>
+          </div>
+
+          <!-- Amount debit/credit -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-daily-income')" class="w-full flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-base font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-5 h-5 shrink-0"></i>
+                <span class="sidebar-text">Amount debit/credit</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-daily-income" class="w-5 h-5 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-daily-income" class="hidden pl-10 pr-3 py-1 space-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./amount-debit-credit/amount-debit-credit.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Amount debit/credit</a>
+              <a href="./amount-debit-credit/debit-credit-history.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Debit/Credit History</a>
+            </div>
+          </div>
+
+          <!-- Withdrawal Active/Deactive -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-withdrawal-active-deactive')" class="w-full flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-base font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-5 h-5 shrink-0"></i>
+                <span class="sidebar-text whitespace-nowrap">Withdrawal Active/Deactive</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-withdrawal-active-deactive" class="w-5 h-5 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-withdrawal-active-deactive" class="hidden pl-10 pr-3 py-1 space-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./withdrawal-active-deactive/withdrawal-active-deactive.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Withdrawal Active/Deactive</a>
+            </div>
+          </div>
+
+          <!-- Generated Payouts -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-generated-payouts')" class="w-full flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-base font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="megaphone" class="w-5 h-5 shrink-0"></i>
+                <span class="sidebar-text">Generated Payouts</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-generated-payouts" class="w-5 h-5 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-generated-payouts" class="hidden pl-10 pr-3 py-1 space-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./generated-payout/generated-payout.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Generated Payout</a>
+            </div>
+          </div>
+
+          <!-- Level Income -->
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='level-income.html'" class="w-full flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-base font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="wallet" class="w-5 h-5 shrink-0"></i>
+                <span class="sidebar-text">Level Income</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Singleleg Income (Active) -->
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='singleleg-income.html'" class="w-full flex items-center justify-between px-3 py-3 rounded-lg bg-brand-dark text-white font-medium text-base transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="wallet" class="w-5 h-5 shrink-0 text-brand-light"></i>
+                <span class="sidebar-text">Singleleg Income</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Fund request -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-topup')" class="w-full flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-base font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-5 h-5 shrink-0"></i>
+                <span class="sidebar-text">Fund Request</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-topup" class="w-5 h-5 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-topup" class="hidden pl-10 pr-3 py-1 space-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./fund-request/pending-fund-request.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Pending Fund Request</a>
+              <a href="./fund-request/approved-fund-request.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Approved Fund Request</a>
+              <a href="./fund-request/rejected-fund-request.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Rejected Fund Request</a>
+            </div>
+          </div>
+
+          <!-- withdrawal -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-kyc')" class="w-full flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-base font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-5 h-5 shrink-0"></i>
+                <span class="sidebar-text">Withdrawal</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-kyc" class="w-5 h-5 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-kyc" class="hidden pl-10 pr-3 py-1 space-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./withdrawals/paid-payments.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Paid Payments</a>
+              <a href="./withdrawals/exportable-paid-payments.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Paid Payments(exportable)</a>
+              <a href="./withdrawals/payment-history.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Payments History</a>
+            </div>
+          </div>
+
+          <!-- deduction -->
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='deduction.html'" class="w-full flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-base font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="wallet" class="w-5 h-5 shrink-0"></i>
+                <span class="sidebar-text">Deduction</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- News -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-withdrawal')" class="w-full flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-base font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-5 h-5 shrink-0"></i>
+                <span class="sidebar-text">News</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-withdrawal" class="w-5 h-5 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./news/dashboard-news.html" class="block py-2 hover:text-brand-dark dark:hover:text-brand-light">Dashboard News</a>
+            </div>
+          </div>
+
+          <!-- Logout -->
+          <div class="sidebar-dropdown">
+            <button class="w-full flex items-center justify-between px-3 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-base font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
+                <span class="sidebar-text">Logout</span>
+              </div>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- Header -->
+    <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
+      <div class="flex items-center space-x-4">
+        <button id="sidebarToggle" onclick="toggleSidebar()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i data-lucide="sidebar" class="w-5 h-5"></i></button>
+        <div class="relative w-64 hidden sm:block">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-1.5 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light">
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i></button>
+        <div class="flex items-center space-x-1 cursor-pointer text-slate-600 dark:text-slate-300 font-medium text-sm">
+          <span>GB</span>
+        </div>
+        <button class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg relative transition">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+          <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">4</span>
+        </button>
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover cursor-pointer">
+      </div>
+    </header>
+
+    <!-- ============ MAIN CONTENT ============ -->
+    <main class="p-6 space-y-6 overflow-y-auto">
+
+      <!-- Page Title & Breadcrumb -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-800 dark:text-white">SingleLeg Income</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">View single leg income details</p>
+        </div>
+        <div class="flex items-center space-x-2 text-xs text-slate-500 dark:text-slate-400">
+          <span>Dashboard</span>
+          <i data-lucide="chevron-right" class="w-3 h-3"></i>
+          <span>Singleleg Income</span>
+          <i data-lucide="chevron-right" class="w-3 h-3"></i>
+          <span class="text-brand-dark dark:text-brand-light font-medium">SingleLeg Income</span>
+        </div>
+      </div>
+
+      <!-- Table Card -->
+      <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        
+        <!-- Card Title Bar -->
+        <div class="flex items-center justify-between px-5 pt-4 card-title-bar">
+          <h2 class="text-base font-medium text-slate-700 dark:text-slate-200">SingleLeg Income</h2>
+          <div class="flex items-center space-x-3">
+            <button class="bg-[#6abf4b] hover:bg-[#5aa83f] text-white text-xs font-semibold px-4 py-1.5 rounded transition shadow-sm">
+              Export Excel
+            </button>
+            <div class="flex items-center space-x-2 text-slate-400">
+              <i data-lucide="maximize-2" class="w-4 h-4 cursor-pointer hover:text-slate-600"></i>
+              <i data-lucide="minus" class="w-4 h-4 cursor-pointer hover:text-slate-600"></i>
+              <i data-lucide="x" class="w-4 h-4 cursor-pointer hover:text-slate-600"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="px-5 pb-5">
+          <div class="table-responsive custom-scrollbar">
+            <table id="singlelegIncomeTable" class="display nowrap" style="width:100%">
+              <thead>
+                <tr>
+                  <th>S.No.</th>
+                  <th>Id</th>
+                  <th>Name</th>
+                  <th>Dated</th>
+                  <th>Amount</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>CRX1001</td>
+                  <td>sssss</td>
+                  <td>25-03-2021</td>
+                  <td>500</td>
+                  <td>CRX979167</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>CRX1001</td>
+                  <td>sssss</td>
+                  <td>25-03-2021</td>
+                  <td>500</td>
+                  <td>CRX172872</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>CRX979167</td>
+                  <td>john smith</td>
+                  <td>25-03-2021</td>
+                  <td>500</td>
+                  <td>CRX749599</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>CRX979167</td>
+                  <td>john smith</td>
+                  <td>25-03-2021</td>
+                  <td>500</td>
+                  <td>CRX726729</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>CRX172872</td>
+                  <td>Vivek</td>
+                  <td>25-03-2021</td>
+                  <td>500</td>
+                  <td>CRX688767</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>CRX172872</td>
+                  <td>Vivek</td>
+                  <td>25-03-2021</td>
+                  <td>500</td>
+                  <td>CRX864008</td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td>CRX749599</td>
+                  <td>vishwajit</td>
+                  <td>25-03-2021</td>
+                  <td>500</td>
+                  <td>CRX996571</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>CRX749599</td>
+                  <td>vishwajit</td>
+                  <td>25-03-2021</td>
+                  <td>500</td>
+                  <td>CRX108825</td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>CRX726729</td>
+                  <td>sumit</td>
+                  <td>25-03-2021</td>
+                  <td>500</td>
+                  <td>CRX674358</td>
+                </tr>
+                <tr>
+                  <td>10</td>
+                  <td>CRX726729</td>
+                  <td>sumit</td>
+                  <td>25-03-2021</td>
+                  <td>500</td>
+                  <td>CRX381219</td>
+                </tr>
+                <!-- Additional rows to match the 78 total entries mentioned in the image -->
+                <tr><td>11</td><td>CRX688767</td><td>vishwajit</td><td>26-03-2021</td><td>500</td><td>CRX1001</td></tr>
+                <tr><td>12</td><td>CRX688767</td><td>vishwajit</td><td>26-03-2021</td><td>500</td><td>CRX979167</td></tr>
+                <tr><td>13</td><td>CRX864008</td><td>sibani</td><td>26-03-2021</td><td>500</td><td>CRX172872</td></tr>
+                <tr><td>14</td><td>CRX864008</td><td>sibani</td><td>26-03-2021</td><td>500</td><td>CRX749599</td></tr>
+                <tr><td>15</td><td>CRX996571</td><td>sibani</td><td>27-03-2021</td><td>500</td><td>CRX726729</td></tr>
+                <tr><td>16</td><td>CRX996571</td><td>sibani</td><td>27-03-2021</td><td>500</td><td>CRX688767</td></tr>
+                <tr><td>17</td><td>CRX108825</td><td>parli</td><td>27-03-2021</td><td>500</td><td>CRX864008</td></tr>
+                <tr><td>18</td><td>CRX108825</td><td>parli</td><td>27-03-2021</td><td>500</td><td>CRX996571</td></tr>
+                <tr><td>19</td><td>CRX674358</td><td>rahul</td><td>28-03-2021</td><td>500</td><td>CRX108825</td></tr>
+                <tr><td>20</td><td>CRX674358</td><td>rahul</td><td>28-03-2021</td><td>500</td><td>CRX674358</td></tr>
+                <tr><td>21</td><td>CRX381219</td><td>priya</td><td>28-03-2021</td><td>500</td><td>CRX381219</td></tr>
+                <tr><td>22</td><td>CRX381219</td><td>priya</td><td>28-03-2021</td><td>500</td><td>CRX1001</td></tr>
+                <tr><td>23</td><td>CRX1001</td><td>sssss</td><td>29-03-2021</td><td>500</td><td>CRX979167</td></tr>
+                <tr><td>24</td><td>CRX1001</td><td>sssss</td><td>29-03-2021</td><td>500</td><td>CRX172872</td></tr>
+                <tr><td>25</td><td>CRX979167</td><td>john smith</td><td>29-03-2021</td><td>500</td><td>CRX749599</td></tr>
+                <tr><td>26</td><td>CRX979167</td><td>john smith</td><td>29-03-2021</td><td>500</td><td>CRX726729</td></tr>
+                <tr><td>27</td><td>CRX172872</td><td>Vivek</td><td>30-03-2021</td><td>500</td><td>CRX688767</td></tr>
+                <tr><td>28</td><td>CRX172872</td><td>Vivek</td><td>30-03-2021</td><td>500</td><td>CRX864008</td></tr>
+                <tr><td>29</td><td>CRX749599</td><td>vishwajit</td><td>30-03-2021</td><td>500</td><td>CRX996571</td></tr>
+                <tr><td>30</td><td>CRX749599</td><td>vishwajit</td><td>30-03-2021</td><td>500</td><td>CRX108825</td></tr>
+                <tr><td>31</td><td>CRX726729</td><td>sumit</td><td>31-03-2021</td><td>500</td><td>CRX674358</td></tr>
+                <tr><td>32</td><td>CRX726729</td><td>sumit</td><td>31-03-2021</td><td>500</td><td>CRX381219</td></tr>
+                <tr><td>33</td><td>CRX688767</td><td>vishwajit</td><td>31-03-2021</td><td>500</td><td>CRX1001</td></tr>
+                <tr><td>34</td><td>CRX688767</td><td>vishwajit</td><td>31-03-2021</td><td>500</td><td>CRX979167</td></tr>
+                <tr><td>35</td><td>CRX864008</td><td>sibani</td><td>01-04-2021</td><td>500</td><td>CRX172872</td></tr>
+                <tr><td>36</td><td>CRX864008</td><td>sibani</td><td>01-04-2021</td><td>500</td><td>CRX749599</td></tr>
+                <tr><td>37</td><td>CRX996571</td><td>sibani</td><td>01-04-2021</td><td>500</td><td>CRX726729</td></tr>
+                <tr><td>38</td><td>CRX996571</td><td>sibani</td><td>01-04-2021</td><td>500</td><td>CRX688767</td></tr>
+                <tr><td>39</td><td>CRX108825</td><td>parli</td><td>02-04-2021</td><td>500</td><td>CRX864008</td></tr>
+                <tr><td>40</td><td>CRX108825</td><td>parli</td><td>02-04-2021</td><td>500</td><td>CRX996571</td></tr>
+                <tr><td>41</td><td>CRX674358</td><td>rahul</td><td>02-04-2021</td><td>500</td><td>CRX108825</td></tr>
+                <tr><td>42</td><td>CRX674358</td><td>rahul</td><td>02-04-2021</td><td>500</td><td>CRX674358</td></tr>
+                <tr><td>43</td><td>CRX381219</td><td>priya</td><td>03-04-2021</td><td>500</td><td>CRX381219</td></tr>
+                <tr><td>44</td><td>CRX381219</td><td>priya</td><td>03-04-2021</td><td>500</td><td>CRX1001</td></tr>
+                <tr><td>45</td><td>CRX1001</td><td>sssss</td><td>03-04-2021</td><td>500</td><td>CRX979167</td></tr>
+                <tr><td>46</td><td>CRX1001</td><td>sssss</td><td>03-04-2021</td><td>500</td><td>CRX172872</td></tr>
+                <tr><td>47</td><td>CRX979167</td><td>john smith</td><td>04-04-2021</td><td>500</td><td>CRX749599</td></tr>
+                <tr><td>48</td><td>CRX979167</td><td>john smith</td><td>04-04-2021</td><td>500</td><td>CRX726729</td></tr>
+                <tr><td>49</td><td>CRX172872</td><td>Vivek</td><td>04-04-2021</td><td>500</td><td>CRX688767</td></tr>
+                <tr><td>50</td><td>CRX172872</td><td>Vivek</td><td>04-04-2021</td><td>500</td><td>CRX864008</td></tr>
+                <tr><td>51</td><td>CRX749599</td><td>vishwajit</td><td>05-04-2021</td><td>500</td><td>CRX996571</td></tr>
+                <tr><td>52</td><td>CRX749599</td><td>vishwajit</td><td>05-04-2021</td><td>500</td><td>CRX108825</td></tr>
+                <tr><td>53</td><td>CRX726729</td><td>sumit</td><td>05-04-2021</td><td>500</td><td>CRX674358</td></tr>
+                <tr><td>54</td><td>CRX726729</td><td>sumit</td><td>05-04-2021</td><td>500</td><td>CRX381219</td></tr>
+                <tr><td>55</td><td>CRX688767</td><td>vishwajit</td><td>06-04-2021</td><td>500</td><td>CRX1001</td></tr>
+                <tr><td>56</td><td>CRX688767</td><td>vishwajit</td><td>06-04-2021</td><td>500</td><td>CRX979167</td></tr>
+                <tr><td>57</td><td>CRX864008</td><td>sibani</td><td>06-04-2021</td><td>500</td><td>CRX172872</td></tr>
+                <tr><td>58</td><td>CRX864008</td><td>sibani</td><td>06-04-2021</td><td>500</td><td>CRX749599</td></tr>
+                <tr><td>59</td><td>CRX996571</td><td>sibani</td><td>07-04-2021</td><td>500</td><td>CRX726729</td></tr>
+                <tr><td>60</td><td>CRX996571</td><td>sibani</td><td>07-04-2021</td><td>500</td><td>CRX688767</td></tr>
+                <tr><td>61</td><td>CRX108825</td><td>parli</td><td>07-04-2021</td><td>500</td><td>CRX864008</td></tr>
+                <tr><td>62</td><td>CRX108825</td><td>parli</td><td>07-04-2021</td><td>500</td><td>CRX996571</td></tr>
+                <tr><td>63</td><td>CRX674358</td><td>rahul</td><td>08-04-2021</td><td>500</td><td>CRX108825</td></tr>
+                <tr><td>64</td><td>CRX674358</td><td>rahul</td><td>08-04-2021</td><td>500</td><td>CRX674358</td></tr>
+                <tr><td>65</td><td>CRX381219</td><td>priya</td><td>08-04-2021</td><td>500</td><td>CRX381219</td></tr>
+                <tr><td>66</td><td>CRX381219</td><td>priya</td><td>08-04-2021</td><td>500</td><td>CRX1001</td></tr>
+                <tr><td>67</td><td>CRX1001</td><td>sssss</td><td>09-04-2021</td><td>500</td><td>CRX979167</td></tr>
+                <tr><td>68</td><td>CRX1001</td><td>sssss</td><td>09-04-2021</td><td>500</td><td>CRX172872</td></tr>
+                <tr><td>69</td><td>CRX979167</td><td>john smith</td><td>09-04-2021</td><td>500</td><td>CRX749599</td></tr>
+                <tr><td>70</td><td>CRX979167</td><td>john smith</td><td>09-04-2021</td><td>500</td><td>CRX726729</td></tr>
+                <tr><td>71</td><td>CRX172872</td><td>Vivek</td><td>10-04-2021</td><td>500</td><td>CRX688767</td></tr>
+                <tr><td>72</td><td>CRX172872</td><td>Vivek</td><td>10-04-2021</td><td>500</td><td>CRX864008</td></tr>
+                <tr><td>73</td><td>CRX749599</td><td>vishwajit</td><td>10-04-2021</td><td>500</td><td>CRX996571</td></tr>
+                <tr><td>74</td><td>CRX749599</td><td>vishwajit</td><td>10-04-2021</td><td>500</td><td>CRX108825</td></tr>
+                <tr><td>75</td><td>CRX726729</td><td>sumit</td><td>11-04-2021</td><td>500</td><td>CRX674358</td></tr>
+                <tr><td>76</td><td>CRX726729</td><td>sumit</td><td>11-04-2021</td><td>500</td><td>CRX381219</td></tr>
+                <tr><td>77</td><td>CRX688767</td><td>vishwajit</td><td>11-04-2021</td><td>500</td><td>CRX1001</td></tr>
+                <tr><td>78</td><td>CRX688767</td><td>vishwajit</td><td>11-04-2021</td><td>500</td><td>CRX979167</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    lucide.createIcons();
+
+    // toggle dropdown (same as index)
+    function toggleDropdown(id) {
+      const targetMenu = document.getElementById(id);
+      const targetIcon = document.getElementById('icon-' + id);
+      document.querySelectorAll('.sidebar-dropdown > div').forEach(el => {
+        if (el.id !== id && !el.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          const otherIcon = document.getElementById('icon-' + el.id);
+          if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+        }
+      });
+      if (targetMenu.classList.contains('hidden')) {
+        targetMenu.classList.remove('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(180deg)';
+      } else {
+        targetMenu.classList.add('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // sidebar collapse
+    let isSidebarCollapsed = false;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const textElements = document.querySelectorAll('.sidebar-text');
+      isSidebarCollapsed = !isSidebarCollapsed;
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-20');
+        textElements.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-80');
+        textElements.forEach(el => el.classList.remove('hidden'));
+      }
+      // re-draw datatable after sidebar transition
+      setTimeout(() => {
+        if ($.fn.DataTable.isDataTable('#singlelegIncomeTable')) {
+          $('#singlelegIncomeTable').DataTable().columns.adjust().draw();
+        }
+      }, 350);
+    }
+
+    // theme toggle
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      const themeIcon = document.getElementById('themeIcon');
+      if (isDark) themeIcon.setAttribute('data-lucide', 'sun');
+      else themeIcon.setAttribute('data-lucide', 'moon');
+      lucide.createIcons();
+      // Redraw DataTable to adapt to new theme
+      if ($.fn.DataTable.isDataTable('#singlelegIncomeTable')) {
+        $('#singlelegIncomeTable').DataTable().columns.adjust().draw();
+      }
+    }
+
+    // init DataTable
+    $(document).ready(function () {
+      $('#singlelegIncomeTable').DataTable({
+        pageLength: 10,
+        lengthMenu: [5, 10, 25, 50],
+        order: [[0, 'asc']],
+        columnDefs: [
+          { orderable: false, targets: [] },
+        ],
+        language: {
+          search: "",
+          searchPlaceholder: "Search...",
+          lengthMenu: "Show _MENU_ entries",
+          info: "Showing _START_ to _END_ of _TOTAL_ entries",
+          infoEmpty: "Showing 0 to 0 of 0 entries",
+          infoFiltered: "(filtered from _MAX_ total entries)",
+          emptyTable: "No data available in table",
+          paginate: {
+            first: "First",
+            last: "Last",
+            next: "Next",
+            previous: "Previous"
+          }
+        },
+        dom: '<"flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"<"flex items-center"l><"flex items-center"f>>rt<"flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-4"<"flex items-center"i><"flex items-center"p>>',
+        initComplete: function () {
+          // style the search input
+          $('.dataTables_filter input').addClass('focus:border-brand-dark dark:focus:border-brand-light');
+          $('.dataTables_length select').addClass('focus:border-brand-dark dark:focus:border-brand-light');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

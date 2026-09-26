@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products · Plan Management</title>
+
+  <!-- Tailwind + fonts + icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#0e4a3d',
+              light: '#b6f059',
+              bg: '#f4f6f8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+
+    #sidebar nav .sidebar-dropdown>button { padding-top: .7rem; padding-bottom: .7rem; font-size: 1rem; }
+    #sidebar nav .sidebar-dropdown>button>div>i,
+    #sidebar nav .sidebar-dropdown>button>i { width: 1.4rem; height: 1.4rem; }
+    #sidebar nav .sidebar-dropdown>div { font-size: .875rem; }
+
+    /* Card wrapper */
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      overflow: hidden;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .dark .card {
+      background: rgba(30, 41, 59, 0.95);
+      border-color: rgba(51, 65, 85, 0.8);
+    }
+
+    /* Card header with brand dark green top divider */
+    .card-header {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid #e2e8f0;
+      position: relative;
+      background: rgba(14, 74, 61, 0.03);
+    }
+    .dark .card-header {
+      border-bottom-color: #334155;
+      background: rgba(182, 240, 89, 0.04);
+    }
+    .card-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: #0e4a3d; /* brand-dark */
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+    .card-header h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0e4a3d;
+      letter-spacing: -0.01em;
+    }
+    .dark .card-header h2 { color: #b6f059; }
+
+    .card-body {
+      padding: 1.25rem;
+      flex: 1;
+    }
+
+    /* Form labels */
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #0e4a3d;
+      margin-bottom: 0.4rem;
+    }
+    .dark .form-label { color: #b6f059; }
+
+    /* Inputs */
+    .form-input {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 0.65rem 2.5rem 0.65rem 0.9rem;
+      font-size: 0.9rem;
+      color: #1e293b;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input::placeholder { color: #94a3b8; }
+    .form-input:focus {
+      border-color: #0e4a3d;
+      box-shadow: 0 0 0 3px rgba(14, 74, 61, 0.1);
+    }
+    .dark .form-input {
+      background: #1e293b;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+    .dark .form-input:focus {
+      border-color: #b6f059;
+      box-shadow: 0 0 0 3px rgba(182, 240, 89, 0.15);
+    }
+
+    /* Textarea */
+    .form-textarea {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 0.65rem 2.5rem 0.65rem 0.9rem;
+      font-size: 0.9rem;
+      color: #1e293b;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      resize: vertical;
+      min-height: 100px;
+      font-family: inherit;
+    }
+    .form-textarea::placeholder { color: #94a3b8; }
+    .form-textarea:focus {
+      border-color: #0e4a3d;
+      box-shadow: 0 0 0 3px rgba(14, 74, 61, 0.1);
+    }
+    .dark .form-textarea {
+      background: #1e293b;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+    .dark .form-textarea:focus {
+      border-color: #b6f059;
+      box-shadow: 0 0 0 3px rgba(182, 240, 89, 0.15);
+    }
+
+    /* Input wrapper with trailing icon */
+    .input-wrap {
+      position: relative;
+    }
+    .input-wrap .trail-icon {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #0e4a3d;
+      pointer-events: none;
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+    }
+    .dark .input-wrap .trail-icon { color: #b6f059; }
+
+    /* Textarea icon corner */
+    .textarea-wrap {
+      position: relative;
+    }
+    .textarea-wrap .corner-icon {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      color: #0e4a3d;
+      pointer-events: none;
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+    }
+    .dark .textarea-wrap .corner-icon { color: #b6f059; }
+
+    /* File input wrapper */
+    .file-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 0.4rem 0.6rem;
+      position: relative;
+    }
+    .dark .file-wrap {
+      background: #1e293b;
+      border-color: #475569;
+    }
+    .file-wrap input[type="file"] {
+      font-size: 0.85rem;
+      color: #1e293b;
+      cursor: pointer;
+    }
+    .dark .file-wrap input[type="file"] { color: #f1f5f9; }
+    .file-wrap .corner-icon {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #0e4a3d;
+      pointer-events: none;
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+    }
+    .dark .file-wrap .corner-icon { color: #b6f059; }
+
+    /* Submit button (brand dark green) */
+    .btn-submit {
+      background: #0e4a3d;
+      color: #b6f059;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.55rem 1.5rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 2px 6px rgba(14, 74, 61, 0.2);
+    }
+    .btn-submit:hover {
+      background: #0b3d32;
+      color: #d9ffb0;
+      box-shadow: 0 4px 12px rgba(14, 74, 61, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Reset button (outlined brand style) */
+    .btn-reset {
+      background: transparent;
+      color: #0e4a3d;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.55rem 1.5rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      border: 1.5px solid #0e4a3d;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-reset:hover {
+      background: rgba(14, 74, 61, 0.08);
+      color: #0b3d32;
+    }
+    .dark .btn-reset {
+      color: #b6f059;
+      border-color: #b6f059;
+    }
+    .dark .btn-reset:hover {
+      background: rgba(182, 240, 89, 0.12);
+      color: #d9ffb0;
+    }
+
+    /* Add button (top right of Product List) */
+    .btn-add {
+      background: #0e4a3d;
+      color: #b6f059;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 2px 6px rgba(14, 74, 61, 0.2);
+    }
+    .btn-add:hover {
+      background: #0b3d32;
+      color: #d9ffb0;
+      box-shadow: 0 4px 12px rgba(14, 74, 61, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Product table */
+    .product-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .product-table th {
+      background: #0e4a3d; /* brand-dark */
+      color: #b6f059;
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 0.75rem;
+      border: 1px solid rgba(182, 240, 89, 0.15);
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .product-table td {
+      padding: 0.65rem 0.75rem;
+      border: 1px solid #e2e8f0;
+      color: #1e293b;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+    .dark .product-table td {
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    .product-table tr:hover td {
+      background: rgba(14, 74, 61, 0.04);
+    }
+    .dark .product-table tr:hover td {
+      background: rgba(182, 240, 89, 0.06);
+    }
+    .product-table .product-icon {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+      display: inline-block;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+    }
+    .dark .product-table .product-icon {
+      background: #334155;
+      border-color: #475569;
+    }
+
+    /* Edit button */
+    .btn-edit {
+      background: #2563eb;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.72rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 4px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-edit:hover { background: #1d4ed8; }
+
+    /* Delete button */
+    .btn-delete {
+      background: #dc2626;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.72rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 4px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-delete:hover { background: #b91c1c; }
+
+    /* Entries select & search */
+    .entries-select {
+      background: transparent;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.8rem;
+      outline: none;
+      cursor: pointer;
+    }
+    .dark .entries-select { border-color: #475569; color: white; background: #1e293b; }
+
+    .search-input {
+      background: transparent;
+      border-bottom: 2px solid #cbd5e1;
+      padding: 0.3rem 0.2rem;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 180px;
+    }
+    .search-input:focus { border-bottom-color: #0e4a3d; }
+    .dark .search-input { border-bottom-color: #475569; color: white; }
+    .dark .search-input:focus { border-bottom-color: #b6f059; }
+
+    /* Pagination active */
+    .page-active {
+      background: #0e4a3d;
+      color: #b6f059;
+    }
+
+    /* Grid layout */
+    .products-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    @media (min-width: 1024px) {
+      .products-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-[#f4f6f8] dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex transition-colors duration-200">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside id="sidebar" class="w-80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-slate-200/60 dark:border-slate-700/60 flex flex-col shrink-0 h-screen sticky top-0 custom-scrollbar overflow-y-auto transition-all duration-300 z-20">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3 sidebar-text">
+        <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
+          <i data-lucide="circle-dot" class="w-5 h-5"></i>
+        </div>
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Plan Management</span>
+      </div>
+    </div>
+
+    <nav class="px-4 pb-6 space-y-6">
+      <div>
+        <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Dashboards</p>
+        <div class="space-y-1">
+
+          <!-- Dashboard -->
+          <a href="./index.html" class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-brand-dark text-white font-medium text-base transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-light shrink-0"></i>
+              <span class="sidebar-text">Dashboard</span>
+            </div>
+          </a>
+
+          <!-- Associates -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-associate')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Associates</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-associate" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-associate" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./Associates/view-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">View Associates</a>
+              <a href="./Associates/edit-details.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Edit Details</a>
+              <a href="./Associates/tree-view.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Tree View</a>
+            </div>
+          </div>
+
+          <!-- Generated Payouts -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-daily-income')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generated Payouts</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-daily-income" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-daily-income" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./generated-payouts/generated-payouts.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Generated Payouts</a>
+              <a href="./generated-payouts/matching-payouts.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Matching Payouts</a>
+              <a href="./generated-payouts/referral-purchase-payouts.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Referral Purchase Payouts</a>
+              <a href="./generated-payouts/referral-percent-payouts.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Referral Percent Payouts</a>
+              <a href="./generated-payouts/rewards.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rewards</a>
+            </div>
+          </div>
+
+          <!-- Withdrawal -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-withdrawal-active-deactive')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text whitespace-nowrap">Withdrawal</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-withdrawal-active-deactive" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-withdrawal-active-deactive" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./withdrawal/pay-amount.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pay Amounts</a>
+              <a href="./withdrawal/paid-payments.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Paid Payments</a>
+              <a href="./withdrawal/payment-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Payment History</a>
+            </div>
+          </div>
+
+          <!-- E-Pin Management -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-generated-payouts')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">E-Pin Management</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-generated-payouts" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-generated-payouts" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./e-pin-management/generate-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Generate E-Pin</a>
+              <a href="./e-pin-management/unused-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Unused E-Pin</a>
+              <a href="./e-pin-management/used-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Used E-Pin</a>
+              <a href="./e-pin-management/user-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">User E-Pin</a>
+            </div>
+          </div>
+
+          <!-- Fund Management -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-topup')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Fund Management</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-topup" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-topup" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./fund-management/fund-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Request</a>
+              <a href="./fund-management/add-fund.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Fund</a>
+              <a href="./fund-management/fund-transfer-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transfer History</a>
+              <a href="./fund-management/user-to-user.fund.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">User To User Fund History</a>
+            </div>
+          </div>
+
+          <!-- News -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-news')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">News</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-news" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-news" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./news/dashboard-news.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Dashboard News</a>
+            </div>
+          </div>
+
+          <!-- Products (Active) -->
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='products.html'" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-brand-dark dark:text-brand-light font-semibold text-sm transition bg-slate-50 dark:bg-slate-700/50">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="wallet" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Products</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Order List -->
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='order-list.html'" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="wallet" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Order List</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Logout -->
+          <div class="sidebar-dropdown">
+            <button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="log-out" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Logout</span>
+              </div>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- Header -->
+    <header class="h-16 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-b border-slate-200/60 dark:border-slate-700/60 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
+      <div class="flex items-center space-x-4">
+        <button id="sidebarToggle" onclick="toggleSidebar()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i data-lucide="sidebar" class="w-5 h-5"></i></button>
+        <div class="relative w-64 hidden sm:block"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-1.5 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light"></div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i></button>
+        <div class="flex items-center space-x-1 cursor-pointer"><span class="text-xl">🇬🇧</span></div>
+        <button class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg relative transition"><i data-lucide="bell" class="w-5 h-5"></i><span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">6</span></button>
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover cursor-pointer">
+      </div>
+    </header>
+
+    <!-- ========== MAIN ========== -->
+    <main class="p-6 space-y-6 overflow-y-auto">
+
+      <!-- Two-card grid -->
+      <div class="products-grid">
+
+        <!-- ===== LEFT: Add Product Form ===== -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Add Product</h2>
+          </div>
+          <div class="card-body space-y-4">
+
+            <!-- Title -->
+            <div>
+              <label class="form-label">Title</label>
+              <div class="input-wrap">
+                <input type="text" class="form-input" placeholder="Title" />
+                <i data-lucide="pencil" class="trail-icon"></i>
+              </div>
+            </div>
+
+            <!-- MRP -->
+            <div>
+              <label class="form-label">MRP</label>
+              <div class="input-wrap">
+                <input type="text" class="form-input" placeholder="Product Price" />
+                <i data-lucide="indian-rupee" class="trail-icon"></i>
+              </div>
+            </div>
+
+            <!-- Product PV -->
+            <div>
+              <label class="form-label">Product PV</label>
+              <div class="input-wrap">
+                <input type="text" class="form-input" placeholder="Product PV" />
+                <i data-lucide="pencil" class="trail-icon"></i>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="form-label">Description</label>
+              <div class="textarea-wrap">
+                <textarea class="form-textarea" placeholder="Description" rows="5"></textarea>
+                <i data-lucide="pencil" class="corner-icon"></i>
+              </div>
+            </div>
+
+            <!-- Product Icon -->
+            <div>
+              <label class="form-label">Product Icon</label>
+              <div class="file-wrap">
+                <input type="file" />
+                <i data-lucide="image" class="corner-icon"></i>
+              </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center gap-3 pt-2">
+              <button type="submit" class="btn-submit">Submit</button>
+              <button type="reset" class="btn-reset">Reset</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ===== RIGHT: Product List Table ===== -->
+        <div class="card">
+          <div class="card-header flex flex-wrap items-center justify-between gap-3">
+            <h2>Product List</h2>
+            <button class="btn-add">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              Add
+            </button>
+          </div>
+          <div class="card-body">
+
+            <!-- Top Bar: Show Entries + Search -->
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                <span>Show</span>
+                <select class="entries-select">
+                  <option>All</option>
+                  <option>10</option>
+                  <option>25</option>
+                  <option>50</option>
+                </select>
+                <span>entries</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-slate-600 dark:text-slate-300">Search:</span>
+                <input type="text" class="search-input" placeholder="" />
+              </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto custom-scrollbar rounded-lg border border-slate-200/60 dark:border-slate-700/60">
+              <table class="product-table w-full min-w-[700px]">
+                <thead>
+                  <tr>
+                    <th class="rounded-tl-lg">#</th>
+                    <th>Title</th>
+                    <th>Icon</th>
+                    <th>MRP</th>
+                    <th>PV</th>
+                    <th>Date</th>
+                    <th class="rounded-tr-lg">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Row 1 -->
+                  <tr>
+                    <td>1</td>
+                    <td>Banyan</td>
+                    <td><img src="https://placehold.co/40x40/e2e8f0/475569?text=B" alt="Banyan" class="product-icon" /></td>
+                    <td>299</td>
+                    <td>150</td>
+                    <td>16-07-2026</td>
+                    <td>
+                      <div class="flex items-center justify-center gap-1.5">
+                        <button class="btn-edit">Edit</button>
+                        <button class="btn-delete">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <!-- Row 2 -->
+                  <tr>
+                    <td>2</td>
+                    <td>Gas Safety Device</td>
+                    <td><img src="https://placehold.co/40x40/e2e8f0/475569?text=G" alt="Gas Safety Device" class="product-icon" /></td>
+                    <td>3500</td>
+                    <td>121</td>
+                    <td>09-04-2022</td>
+                    <td>
+                      <div class="flex items-center justify-center gap-1.5">
+                        <button class="btn-edit">Edit</button>
+                        <button class="btn-delete">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <!-- Row 3 -->
+                  <tr>
+                    <td>3</td>
+                    <td>Bio Magnetic Bracelet</td>
+                    <td><img src="https://placehold.co/40x40/e2e8f0/475569?text=B" alt="Bio Magnetic Bracelet" class="product-icon" /></td>
+                    <td>1500</td>
+                    <td>67</td>
+                    <td>09-04-2022</td>
+                    <td>
+                      <div class="flex items-center justify-center gap-1.5">
+                        <button class="btn-edit">Edit</button>
+                        <button class="btn-delete">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <!-- Row 4 -->
+                  <tr>
+                    <td>4</td>
+                    <td>Alkaline Water Bottle</td>
+                    <td><img src="https://placehold.co/40x40/e2e8f0/475569?text=A" alt="Alkaline Water Bottle" class="product-icon" /></td>
+                    <td>1500</td>
+                    <td>48</td>
+                    <td>09-04-2022</td>
+                    <td>
+                      <div class="flex items-center justify-center gap-1.5">
+                        <button class="btn-edit">Edit</button>
+                        <button class="btn-delete">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <!-- Row 5 -->
+                  <tr>
+                    <td>5</td>
+                    <td>Immunity Booster Juice</td>
+                    <td><img src="https://placehold.co/40x40/e2e8f0/475569?text=I" alt="Immunity Booster Juice" class="product-icon" /></td>
+                    <td>599</td>
+                    <td>32</td>
+                    <td>09-04-2022</td>
+                    <td>
+                      <div class="flex items-center justify-center gap-1.5">
+                        <button class="btn-edit">Edit</button>
+                        <button class="btn-delete">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <!-- Row 6 -->
+                  <tr>
+                    <td>6</td>
+                    <td>Multi Berry Juice</td>
+                    <td><img src="https://placehold.co/40x40/e2e8f0/475569?text=M" alt="Multi Berry Juice" class="product-icon" /></td>
+                    <td>599</td>
+                    <td>32</td>
+                    <td>09-04-2022</td>
+                    <td>
+                      <div class="flex items-center justify-center gap-1.5">
+                        <button class="btn-edit">Edit</button>
+                        <button class="btn-delete">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <!-- Row 7 -->
+                  <tr>
+                    <td>7</td>
+                    <td>Kinoki Foot Patche</td>
+                    <td><img src="https://placehold.co/40x40/e2e8f0/475569?text=K" alt="Kinoki Foot Patche" class="product-icon" /></td>
+                    <td>800</td>
+                    <td>35</td>
+                    <td>02-06-2022</td>
+                    <td>
+                      <div class="flex items-center justify-center gap-1.5">
+                        <button class="btn-edit">Edit</button>
+                        <button class="btn-delete">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination Footer -->
+            <div class="flex items-center justify-between mt-4 text-xs text-slate-400 dark:text-slate-500">
+              <span>Showing 1 to 7 of 7 entries</span>
+              <div class="flex items-center gap-2">
+                <span class="cursor-pointer hover:text-slate-600 dark:hover:text-slate-300 transition">Previous</span>
+                <button class="px-2.5 py-1 rounded page-active font-medium text-xs">1</button>
+                <span class="cursor-pointer hover:text-slate-600 dark:hover:text-slate-300 transition">Next</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div> <!-- /products-grid -->
+
+    </main>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    lucide.createIcons();
+
+    // --- Sidebar dropdown toggle ---
+    function toggleDropdown(id) {
+      const targetMenu = document.getElementById(id);
+      const targetIcon = document.getElementById('icon-' + id);
+      document.querySelectorAll('.sidebar-dropdown > div').forEach(el => {
+        if (el.id !== id && !el.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          const otherIcon = document.getElementById('icon-' + el.id);
+          if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+        }
+      });
+      if (targetMenu.classList.contains('hidden')) {
+        targetMenu.classList.remove('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(180deg)';
+      } else {
+        targetMenu.classList.add('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // --- Sidebar collapse ---
+    let isSidebarCollapsed = false;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const textElements = document.querySelectorAll('.sidebar-text');
+      isSidebarCollapsed = !isSidebarCollapsed;
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-20');
+        textElements.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-80');
+        textElements.forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    // --- Theme toggle ---
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      const themeIcon = document.getElementById('themeIcon');
+      if (isDark) themeIcon.setAttribute('data-lucide', 'sun');
+      else themeIcon.setAttribute('data-lucide', 'moon');
+      lucide.createIcons();
+    }
+  </script>
+
+</body>
+</html>

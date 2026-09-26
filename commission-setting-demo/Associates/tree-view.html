@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Associate Tree · Plan Management</title>
+
+  <!-- Tailwind + fonts + icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#0e4a3d',
+              light: '#b6f059',
+              bg: '#f4f6f8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+
+    #sidebar nav .sidebar-dropdown>button { padding-top: .7rem; padding-bottom: .7rem; font-size: 1rem; }
+    #sidebar nav .sidebar-dropdown>button>div>i,
+    #sidebar nav .sidebar-dropdown>button>i { width: 1.4rem; height: 1.4rem; }
+    #sidebar nav .sidebar-dropdown>div { font-size: .875rem; }
+
+    /* ---- Tree View Specific Styles ---- */
+    .tree-container {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(226, 232, 240, 0.6);
+      border-radius: 16px;
+      padding: 2rem 1rem;
+      min-height: 600px;
+      overflow-x: auto;
+    }
+    .dark .tree-container {
+      background: rgba(30, 41, 59, 0.7);
+      border-color: rgba(51, 65, 85, 0.6);
+    }
+
+    /* Tree layout helpers */
+    .tree-level {
+      display: flex;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 3.5rem;
+    }
+    .tree-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      padding: 0 1rem;
+      min-width: 180px;
+    }
+    .tree-node .user-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.25rem;
+    }
+    .user-icon.blue { background: #e0f2fe; color: #0284c7; }
+    .user-icon.red { background: #fee2e2; color: #dc2626; }
+    .user-icon.gray { background: #f1f5f9; color: #64748b; }
+    .dark .user-icon.blue { background: #0c4a6e; color: #38bdf8; }
+    .dark .user-icon.red { background: #7f1d1d; color: #fca5a5; }
+    .dark .user-icon.gray { background: #334155; color: #94a3b8; }
+
+    .tree-node .name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #1e293b;
+      margin-bottom: 0.1rem;
+    }
+    .dark .tree-node .name { color: #e2e8f0; }
+    .tree-node .id {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 0.2rem;
+    }
+    .dark .tree-node .id { color: #94a3b8; }
+    .tree-node .business {
+      font-size: 0.7rem;
+      color: #475569;
+      line-height: 1.3;
+      max-width: 160px;
+    }
+    .dark .tree-node .business { color: #cbd5e1; }
+
+    /* Question mark node */
+    .tree-node .question-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      color: #2563eb;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .dark .tree-node .question-mark { color: #60a5fa; }
+
+    /* Search bar custom */
+    .tree-search-input {
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      outline: none;
+      width: 260px;
+      transition: border-color 0.2s;
+    }
+    .tree-search-input:focus { border-color: #0e4a3d; }
+    .dark .tree-search-input { background: #1e293b; border-color: #475569; color: white; }
+    .dark .tree-search-input:focus { border-color: #b6f059; }
+
+    .btn-search {
+      background: #4ade80;
+      color: #0e4a3d;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-search:hover { background: #22c55e; }
+    .btn-search i { width: 18px; height: 18px; }
+
+    /* Connector lines (simple visual) */
+    .connector-line {
+      position: absolute;
+      top: -2rem;
+      left: 50%;
+      width: 2px;
+      height: 2rem;
+      background: #cbd5e1;
+      transform: translateX(-50%);
+    }
+    .dark .connector-line { background: #475569; }
+
+    .tree-level .tree-node:first-child .connector-line { display: none; }
+    .tree-level .tree-node .connector-line { display: block; }
+  </style>
+</head>
+
+<body class="bg-[#f4f6f8] dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex transition-colors duration-200">
+
+  <!-- ========== SIDEBAR (exact same as index) ========== -->
+   <aside id="sidebar" class="w-80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-slate-200/60 dark:border-slate-700/60 flex flex-col shrink-0 h-screen sticky top-0 custom-scrollbar overflow-y-auto transition-all duration-300 z-20">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3 sidebar-text">
+        <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
+          <i data-lucide="circle-dot" class="w-5 h-5"></i>
+        </div>
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Plan Management</span>
+      </div>
+    </div>
+
+    <nav class="px-4 pb-6 space-y-6">
+      <div>
+        <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Dashboards</p>
+        <div class="space-y-1">
+
+          <!-- Dashboard -->
+          <a href="../index.html" class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-brand-dark text-white font-medium text-base transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-light shrink-0"></i>
+              <span class="sidebar-text">Dashboard</span>
+            </div>
+          </a>
+
+          <!-- Associate (active, but link to view-associates) -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-associate')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Associates</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-associate" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-associate" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../Associates/view-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">View Associates</a>
+              <a href="../Associates/edit-details.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Edit Details</a>
+              <a href="../Associates/tree-view.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Tree View</a>
+            </div>
+          </div>
+
+          <!-- Generated Payouts -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-daily-income')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generated Payouts</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-daily-income" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-daily-income" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../generated-payouts/generated-payouts.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Generated Payouts</a>
+              <a href="../generated-payouts/matching-payouts.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Matching Payouts</a>
+              <a href="../generated-payouts/referral-purchase-payouts.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Referral Purchase Payouts</a>
+              <a href="../generated-payouts/referral-percent-payouts.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Referral Percent Payouts</a>
+              <a href="../generated-payouts/rewards.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rewards</a>
+            </div>
+          </div>
+
+          <!-- Withdrawal -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-withdrawal-active-deactive')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text whitespace-nowrap">Withdrawal</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-withdrawal-active-deactive" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-withdrawal-active-deactive" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../withdrawal/pay-amount.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pay Amounts</a>
+              <a href="../withdrawal/paid-payments.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Paid Payments</a>
+              <a href="../withdrawal/payment-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Payment History</a>
+            </div>
+          </div>
+
+          <!-- E-Pin Management -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-generated-payouts')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">E-Pin Management</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-generated-payouts" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-generated-payouts" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../e-pin-management/generate-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Generate E-Pin</a>
+              <a href="../e-pin-management/unused-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Unused E-Pin</a>
+              <a href="../e-pin-management/used-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Used E-Pin</a>
+              <a href="../e-pin-management/user-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">User E-Pin</a>
+            </div>
+          </div>
+
+          <!-- Fund Management -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-topup')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Fund Management</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-topup" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-topup" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../fund-management/fund-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Request</a>
+              <a href="../fund-management/add-fund.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Fund</a>
+              <a href="../fund-management/fund-transfer-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transfer History</a>
+              <a href="../fund-management/user-to-user.fund.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">User To User Fund History</a>
+            </div>
+          </div>
+
+          <!-- News -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-news')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">News</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-news" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-news" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../news/dashboard-news.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Dashboard News</a>
+            </div>
+          </div>
+
+          <!-- Products -->
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='../products.html'" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="wallet" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Products</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Order List -->
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='../order-list.html'" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="wallet" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Order List</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Logout -->
+          <div class="sidebar-dropdown">
+            <button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="log-out" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Logout</span>
+              </div>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- header (exact same as index) -->
+    <header class="h-16 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-b border-slate-200/60 dark:border-slate-700/60 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
+      <div class="flex items-center space-x-4">
+        <button id="sidebarToggle" onclick="toggleSidebar()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i data-lucide="sidebar" class="w-5 h-5"></i></button>
+        <div class="relative w-64 hidden sm:block"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-1.5 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light"></div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i></button>
+        <div class="flex items-center space-x-1 cursor-pointer"><span class="text-xl">🇬🇧</span></div>
+        <button class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg relative transition"><i data-lucide="bell" class="w-5 h-5"></i><span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">6</span></button>
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover cursor-pointer">
+      </div>
+    </header>
+
+    <!-- ========== MAIN CONTENT (Tree View) ========== -->
+    <main class="p-6 space-y-6 overflow-y-auto">
+
+      <!-- Breadcrumb + Page Title -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+          <i data-lucide="home" class="w-4 h-4 text-brand-dark dark:text-brand-light"></i>
+          <a href="./index.html" class="hover:text-brand-dark dark:hover:text-brand-light transition">Home</a>
+          <span class="text-slate-300 dark:text-slate-600">/</span>
+          <span class="font-medium text-slate-800 dark:text-white">Associate Tree</span>
+        </div>
+        <div class="flex items-center gap-2 text-slate-400">
+          <button class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition"><i data-lucide="maximize-2" class="w-4 h-4"></i></button>
+          <button class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+          <button class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition"><i data-lucide="menu" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+
+      <!-- Search Bar Row -->
+      <div class="flex flex-wrap items-center gap-3">
+        <input type="text" placeholder="Enter Id" class="tree-search-input" />
+        <button class="btn-search">
+          <i data-lucide="search" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Tree Container -->
+      <div class="tree-container custom-scrollbar">
+
+        <!-- LEVEL 1: ROOT -->
+        <div class="tree-level" style="margin-top: 1rem;">
+          <div class="tree-node">
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">ROOT</div>
+            <div class="user-icon blue">
+              <i data-lucide="user" class="w-6 h-6"></i>
+            </div>
+            <div class="name">Demo Enterprise</div>
+            <div class="id">{ 1001 }</div>
+            <div class="business">left Business - 30219.25 | Right Business- 200</div>
+          </div>
+        </div>
+
+        <!-- LEVEL 2 -->
+        <div class="tree-level" style="justify-content: space-around; margin-top: 3rem;">
+          <!-- Left Child -->
+          <div class="tree-node">
+            <div class="connector-line" style="top: -2.5rem;"></div>
+            <div class="user-icon blue">
+              <i data-lucide="user" class="w-6 h-6"></i>
+            </div>
+            <div class="name">SANJAY</div>
+            <div class="id">(VTS440003)</div>
+            <div class="business">left Business - 29919.25 | Right Business- 300</div>
+          </div>
+          <!-- Right Child -->
+          <div class="tree-node">
+            <div class="connector-line" style="top: -2.5rem;"></div>
+            <div class="user-icon blue">
+              <i data-lucide="user" class="w-6 h-6"></i>
+            </div>
+            <div class="name">Test</div>
+            <div class="id">(VTS795361)</div>
+            <div class="business">left Business - 0 | Right Business- 100</div>
+          </div>
+        </div>
+
+        <!-- LEVEL 3 -->
+        <div class="tree-level" style="justify-content: space-around; margin-top: 3rem;">
+
+          <!-- Left side group -->
+          <div class="flex gap-8">
+            <!-- Node: Mangal singh (blue) -->
+            <div class="tree-node">
+              <div class="connector-line" style="top: -2.5rem;"></div>
+              <div class="user-icon blue">
+                <i data-lucide="user" class="w-6 h-6"></i>
+              </div>
+              <div class="name">Mangal singh</div>
+              <div class="id">(VTS823130)</div>
+              <div class="business">left Business - 29912.25 | Right Business- 0</div>
+            </div>
+            <!-- Node: SAKIRUL ISLAM (red) -->
+            <div class="tree-node">
+              <div class="connector-line" style="top: -2.5rem;"></div>
+              <div class="user-icon red">
+                <i data-lucide="user" class="w-6 h-6"></i>
+              </div>
+              <div class="name">SAKIRUL ISLAM</div>
+              <div class="id">(VTS696786)</div>
+              <div class="business">left Business - 0 | Right Business- 0</div>
+            </div>
+          </div>
+
+          <!-- Middle question mark placeholder -->
+          <div class="tree-node" style="min-width: auto;">
+            <div class="connector-line" style="top: -2.5rem;"></div>
+            <div class="question-mark">?</div>
+          </div>
+
+          <!-- Right side group -->
+          <div class="flex gap-8">
+            <!-- Node: VISHWAJIT KUMAR (red) -->
+            <div class="tree-node">
+              <div class="connector-line" style="top: -2.5rem;"></div>
+              <div class="user-icon red">
+                <i data-lucide="user" class="w-6 h-6"></i>
+              </div>
+              <div class="name">VISHWAJIT KUMAR</div>
+              <div class="id">(VTS547726)</div>
+              <div class="business">left Business - 0 | Right Business- 100</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div> <!-- /tree-container -->
+
+    </main>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    lucide.createIcons();
+
+    // --- Sidebar dropdown toggle (same as index) ---
+    function toggleDropdown(id) {
+      const targetMenu = document.getElementById(id);
+      const targetIcon = document.getElementById('icon-' + id);
+      document.querySelectorAll('.sidebar-dropdown > div').forEach(el => {
+        if (el.id !== id && !el.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          const otherIcon = document.getElementById('icon-' + el.id);
+          if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+        }
+      });
+      if (targetMenu.classList.contains('hidden')) {
+        targetMenu.classList.remove('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(180deg)';
+      } else {
+        targetMenu.classList.add('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // --- Sidebar collapse ---
+    let isSidebarCollapsed = false;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const textElements = document.querySelectorAll('.sidebar-text');
+      isSidebarCollapsed = !isSidebarCollapsed;
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-20');
+        textElements.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-80');
+        textElements.forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    // --- Theme toggle ---
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      const themeIcon = document.getElementById('themeIcon');
+      if (isDark) themeIcon.setAttribute('data-lucide', 'sun');
+      else themeIcon.setAttribute('data-lucide', 'moon');
+      lucide.createIcons();
+    }
+
+    // --- Auto-open associates dropdown on page load ---
+    window.addEventListener('DOMContentLoaded', () => {
+      const associateMenu = document.getElementById('dash-associate');
+      const associateIcon = document.getElementById('icon-dash-associate');
+      if (associateMenu && associateMenu.classList.contains('hidden')) {
+        associateMenu.classList.remove('hidden');
+        if (associateIcon) associateIcon.style.transform = 'rotate(180deg)';
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consistency Report - Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: { brand: { dark: '#0e4a3d', light: '#b6f059', bg: '#f4f6f8' } }
+        }
+      }
+    }
+  </script>
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    table thead th[class~="border-[#006666]"] { border-color: rgb(6 78 59 / 0.5); }
+    #sidebar nav .sidebar-dropdown > button { padding-top: .7rem; padding-bottom: .7rem; font-size: 1rem; }
+    #sidebar nav .sidebar-dropdown > button > div > i,
+    #sidebar nav .sidebar-dropdown > button > i { width: 1.4rem; height: 1.4rem; }
+    #sidebar nav .sidebar-dropdown > div { font-size: .875rem; }
+    #sidebar nav > div > div > a { font-size: 1rem; }
+  </style>
+</head>
+<body class="bg-[#f4f6f8] dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex transition-colors duration-200">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-80 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shrink-0 h-screen sticky top-0 custom-scrollbar overflow-y-auto transition-all duration-300 z-20">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3 sidebar-text">
+        <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
+          <i data-lucide="circle-dot" class="w-5 h-5"></i>
+        </div>
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Admin Pannel Demo</span>
+      </div>
+    </div>
+    <nav class="px-4 pb-6 space-y-6">
+      <div>
+        <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Dashboards</p>
+        <div class="space-y-1">
+          <a href="../index.html" class="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 font-medium text-sm transition">
+            <div class="flex items-center space-x-3"><i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Dashboard</span></div>
+          </a>
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-ecommerce')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="shopping-bag" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Admin &amp; Rights</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-ecommerce" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-ecommerce" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../admin-table.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Admin Table</a>
+            </div>
+          </div>
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-associate')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Associate</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-associate" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-associate" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../all-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">All Associate</a>
+              <a href="../active-associate.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Active Associate</a>
+              <a href="../inactive-associate.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inactive Associate</a>
+            </div>
+          </div>
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-front')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="home" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Activation History</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-front" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-front" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../activation-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Activation History</a>
+            </div>
+          </div>
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-kyc')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">KYC</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-kyc" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-kyc" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../kyc/kyc-pending.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Request</a>
+              <a href="../kyc/kyc-accepted.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Request</a>
+              <a href="../kyc/kyc-rejected.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Request</a>
+            </div>
+          </div>
+          <!-- Active: Report -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-report')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-brand-dark text-white text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Report</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-report" class="w-4 h-4 transition-transform duration-200 sidebar-text rotate-180"></i>
+            </button>
+            <div id="dash-report" class="pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./autopool-table.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Autopool Table</a>
+              <a href="./tds-charge-report.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">TDS Charge Report</a>
+              <a href="./repurchase-report.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Repurchase Report</a>
+              <a href="./consistency-report.html" class="block py-1.5 text-brand-dark dark:text-brand-light font-semibold">Consistency Report</a>
+              <a href="./early-bird-report.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Early Bird Report</a>
+              <a href="./fast-track-benifit-report.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fast Track Benifit Report</a>
+              <a href="./achievement-report.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Achievement Report</a>
+            </div>
+          </div>
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-fund-request')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Fund Request</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-fund-request" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-fund-request" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../fund-request/pending-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Request</a>
+              <a href="../fund-request/accepted-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Request</a>
+              <a href="../fund-request/Rejected-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Request</a>
+            </div>
+          </div>
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-fund-transaction')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Fund Transaction</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-fund-transaction" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-fund-transaction" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../fund-transaction/fund-transfer.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transaction</a>
+              <a href="../fund-transaction/admin-credit-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Admin Credit History</a>
+              <a href="../fund-transaction/admin-debit-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Admin Debit History</a>
+            </div>
+          </div>
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='../generated-payout.html'" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Generated Payout</span></div>
+            </button>
+          </div>
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Withdrawal Request</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../withdrawal-request/processing-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Processing Request</a>
+              <a href="../withdrawal-request/accepted-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Request</a>
+              <a href="../withdrawal-request/rejected-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Request</a>
+            </div>
+          </div>
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-notification')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Notification</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-notification" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-notification" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="#" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Model/Banner News</a>
+              <a href="#" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Notification</a>
+              <a href="../notification/add-qr-code.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add QR Code</a>
+            </div>
+          </div>
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-activation-packages')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Activation Packages</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-activation-packages" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-activation-packages" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../Activation-package/manage-package.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Manage Package Type</a>
+              <a href="../Activation-package/add-package-kit.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Package Kit</a>
+              <a href="../Activation-package/manage-package-kit.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Manage Package Kit</a>
+            </div>
+          </div>
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-admin-setting')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Admin Setting</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-admin-setting" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-admin-setting" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../admin-setting/withdrawal-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Withdrawal Settings</a>
+              <a href="../admin-setting/onetime-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Onetime Setting</a>
+              <a href="../admin-setting/autopool-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Autopool Setting</a>
+              <a href="../admin-setting/repurchase-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Repurchase Setting</a>
+              <a href="../admin-setting/fast-track-benifit-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fast Track Benifit Setting</a>
+              <a href="../admin-setting/achievement-benifit-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Achievement Benifit Setting</a>
+              <a href="../admin-setting/consistency-benifit-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Consistency Benifit Setting</a>
+              <a href="../admin-setting/early-bird-benifit-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Early Bird Benifit Setting</a>
+            </div>
+          </div>
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-support')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Support</span></div>
+              <i data-lucide="chevron-down" id="icon-dash-support" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-support" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../support/inbox.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inbox</a>
+              <a href="../support/outbox.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Outbox</a>
+            </div>
+          </div>
+          <div class="sidebar-dropdown">
+            <button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3"><i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i><span class="sidebar-text">Logout</span></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
+      <div class="flex items-center space-x-4">
+        <button onclick="toggleSidebar()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i data-lucide="sidebar" class="w-5 h-5"></i></button>
+        <div class="relative w-64 hidden sm:block">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-1.5 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:border-brand-dark">
+        </div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button onclick="toggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i></button>
+        <span class="text-xl">🇬🇧</span>
+        <button class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg relative transition">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+          <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">6</span>
+        </button>
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover cursor-pointer">
+      </div>
+    </header>
+
+    <main class="p-4 md:p-6 overflow-y-auto">
+      <div class="bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+
+        <!-- Card Header -->
+        <div class="bg-brand-dark text-white px-4 py-3 flex items-center justify-between">
+          <h2 class="text-lg font-semibold tracking-wide">Consistency Report</h2>
+          <div class="flex items-center space-x-1">
+            <button class="p-1 hover:bg-white/20 rounded-full transition"><i data-lucide="maximize-2" class="w-4 h-4"></i></button>
+            <button class="p-1 hover:bg-white/20 rounded-full transition"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+            <button class="p-1 hover:bg-white/20 rounded-full transition"><i data-lucide="minus" class="w-4 h-4 text-yellow-400"></i></button>
+            <button class="p-1 hover:bg-white/20 rounded-full transition"><i data-lucide="x" class="w-4 h-4 text-red-500"></i></button>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700">
+          <div class="flex items-center space-x-2">
+            <div class="relative w-64">
+              <i data-lucide="user" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input type="text" placeholder="USER ID" class="w-full pl-9 pr-4 py-1.5 border border-slate-300 dark:border-slate-600 rounded-full text-sm bg-transparent focus:outline-none focus:border-brand-dark">
+            </div>
+            <button class="bg-brand-dark hover:bg-emerald-900 text-white p-1.5 rounded transition shadow-sm"><i data-lucide="search" class="w-4 h-4"></i></button>
+          </div>
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4">
+            <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600 dark:text-slate-300">
+              <div class="flex items-center space-x-2">
+                <span>Show</span>
+                <select class="border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded px-2 py-1 focus:outline-none"><option>25</option><option>50</option><option>100</option></select>
+                <span>entries</span>
+              </div>
+              <div class="flex space-x-1">
+                <button onclick="copyTable()" class="px-3 py-1 bg-brand-dark text-white rounded text-xs hover:bg-emerald-900 transition">Copy</button>
+                <button onclick="exportCSV()" class="px-3 py-1 bg-brand-dark text-white rounded text-xs hover:bg-emerald-900 transition">CSV</button>
+                <button onclick="exportCSV()" class="px-3 py-1 bg-brand-dark text-white rounded text-xs hover:bg-emerald-900 transition">Excel</button>
+                <button onclick="window.print()" class="px-3 py-1 bg-brand-dark text-white rounded text-xs hover:bg-emerald-900 transition">PDF</button>
+                <button onclick="window.print()" class="px-3 py-1 bg-brand-dark text-white rounded text-xs hover:bg-emerald-900 transition">Print</button>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 text-sm">
+              <label class="text-slate-600 dark:text-slate-300">Search:</label>
+              <input id="tableSearch" type="text" oninput="filterTable()" class="border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded px-3 py-1 focus:outline-none w-48">
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto w-full">
+          <table id="dataTable" class="w-full text-left border-collapse whitespace-nowrap min-w-max text-[13px]">
+            <thead>
+              <tr class="bg-brand-dark text-white">
+                <th class="py-2.5 px-3 font-semibold border-r border-[#006666] relative pr-6 cursor-pointer" onclick="sortTable(0)">Sl <i data-lucide="chevrons-up-down" class="w-3 h-3 absolute right-1 top-1/2 -translate-y-1/2 opacity-70"></i></th>
+                <th class="py-2.5 px-3 font-semibold border-r border-[#006666] relative pr-6 cursor-pointer" onclick="sortTable(1)">Member ID <i data-lucide="chevrons-up-down" class="w-3 h-3 absolute right-1 top-1/2 -translate-y-1/2 opacity-70"></i></th>
+                <th class="py-2.5 px-3 font-semibold border-r border-[#006666] relative pr-6 cursor-pointer" onclick="sortTable(2)">Name <i data-lucide="chevrons-up-down" class="w-3 h-3 absolute right-1 top-1/2 -translate-y-1/2 opacity-70"></i></th>
+                <th class="py-2.5 px-3 font-semibold border-r border-[#006666] relative pr-6 cursor-pointer" onclick="sortTable(3)">Level <i data-lucide="chevrons-up-down" class="w-3 h-3 absolute right-1 top-1/2 -translate-y-1/2 opacity-70"></i></th>
+                <th class="py-2.5 px-3 font-semibold border-r border-[#006666] relative pr-6 cursor-pointer" onclick="sortTable(4)">Income <i data-lucide="chevrons-up-down" class="w-3 h-3 absolute right-1 top-1/2 -translate-y-1/2 opacity-70"></i></th>
+                <th class="py-2.5 px-3 font-semibold relative pr-6 cursor-pointer" onclick="sortTable(5)">Date <i data-lucide="chevrons-up-down" class="w-3 h-3 absolute right-1 top-1/2 -translate-y-1/2 opacity-70"></i></th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="text-slate-700 dark:text-slate-300">
+              <tr class="bg-white dark:bg-slate-800 border-b border-dashed border-slate-200 dark:border-slate-700">
+                <td colspan="6" class="py-8 text-center text-slate-500 dark:text-slate-400">No data available in table</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 bg-white dark:bg-slate-800 flex flex-col md:flex-row items-center justify-between text-sm text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700">
+          <span id="entriesInfo">Showing 0 to 0 of 0 entries</span>
+          <div class="flex items-center space-x-1 mt-4 md:mt-0">
+            <button class="px-3 py-1 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition">Previous</button>
+            <button class="px-3 py-1 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition">Next</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+    function toggleDropdown(id){const m=document.getElementById(id),i=document.getElementById('icon-'+id);document.querySelectorAll('.sidebar-dropdown > div').forEach(el=>{if(el.id!==id&&!el.classList.contains('hidden')){el.classList.add('hidden');const x=document.getElementById('icon-'+el.id);if(x)x.style.transform='rotate(0deg)'}});if(m.classList.contains('hidden')){m.classList.remove('hidden');if(i)i.style.transform='rotate(180deg)'}else{m.classList.add('hidden');if(i)i.style.transform='rotate(0deg)'}}
+    let collapsed=false;function toggleSidebar(){const s=document.getElementById('sidebar');collapsed=!collapsed;if(collapsed){s.classList.replace('w-80','w-0');s.classList.add('overflow-hidden')}else{s.classList.replace('w-0','w-80');s.classList.remove('overflow-hidden')}}
+    function toggleTheme(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('themeIcon').setAttribute('data-lucide',d?'sun':'moon');lucide.createIcons()}
+    function filterTable(){const q=document.getElementById('tableSearch').value.toLowerCase();document.querySelectorAll('#tableBody tr').forEach(r=>{if(!r.querySelector('td[colspan]')) r.style.display=r.textContent.toLowerCase().includes(q)?'':'none'})}
+    let sd={};function sortTable(c){const tb=document.getElementById('tableBody');if(tb.querySelector('td[colspan]'))return;const rows=Array.from(tb.querySelectorAll('tr'));sd[c]=!sd[c];rows.sort((a,b)=>{const at=a.cells[c]?.textContent.trim()||'';const bt=b.cells[c]?.textContent.trim()||'';const an=parseFloat(at),bn=parseFloat(bt);if(!isNaN(an)&&!isNaN(bn))return sd[c]?an-bn:bn-an;return sd[c]?at.localeCompare(bt):bt.localeCompare(at)});rows.forEach(r=>tb.appendChild(r))}
+    function copyTable(){let t='';document.querySelectorAll('#tableBody tr').forEach(r=>{if(!r.querySelector('td[colspan]')) t+=Array.from(r.cells).map(c=>c.textContent.trim()).join('\t')+'\n'});if(t) navigator.clipboard.writeText(t).then(()=>alert('Copied!'))}
+    function exportCSV(){const h=['Sl','Member ID','Name','Level','Income','Date'];let csv=h.join(',')+'\n';document.querySelectorAll('#tableBody tr').forEach(r=>{if(!r.querySelector('td[colspan]')) csv+=Array.from(r.cells).map(c=>'"'+c.textContent.trim()+'"').join(',')+'\n'});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='consistency-report.csv';a.click()}
+  </script>
+</body>
+</html>

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NiceDash · Analytics</title>
+
+  <!-- Tailwind + fonts + icons + Chart.js -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#0e4a3d',
+              light: '#b6f059',
+              bg: '#f4f6f8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    #sidebar nav .sidebar-dropdown>button { padding-top: .7rem; padding-bottom: .7rem; font-size: 1rem; }
+    #sidebar nav .sidebar-dropdown>button>div>i,
+    #sidebar nav .sidebar-dropdown>button>i { width: 1.4rem; height: 1.4rem; }
+    #sidebar nav .sidebar-dropdown>div { font-size: .875rem; }
+
+    /* ---- enhanced card hover & glass effect ---- */
+    .stat-card {
+      transition: all 0.25s ease;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(226, 232, 240, 0.5);
+    }
+    .dark .stat-card {
+      background: rgba(30, 41, 59, 0.7);
+      border-color: rgba(51, 65, 85, 0.5);
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.15);
+      border-color: #b6f059;
+    }
+    .dark .stat-card:hover {
+      box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.5);
+      border-color: #b6f059;
+    }
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(14, 74, 61, 0.08);
+      color: #0e4a3d;
+    }
+    .dark .stat-icon {
+      background: rgba(182, 240, 89, 0.12);
+      color: #b6f059;
+    }
+    .stat-trend-up { color: #059669; background: rgba(5, 150, 105, 0.08); }
+    .stat-trend-down { color: #dc2626; background: rgba(220, 38, 38, 0.08); }
+    .dark .stat-trend-up { color: #34d399; background: rgba(52, 211, 153, 0.12); }
+    .dark .stat-trend-down { color: #f87171; background: rgba(248, 113, 113, 0.12); }
+  </style>
+</head>
+
+<body class="bg-[#f4f6f8] dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex transition-colors duration-200">
+
+  <!-- ========== SIDEBAR (UPDATED) ========== -->
+  <aside id="sidebar" class="w-80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-slate-200/60 dark:border-slate-700/60 flex flex-col shrink-0 h-screen sticky top-0 custom-scrollbar overflow-y-auto transition-all duration-300 z-20">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3 sidebar-text">
+        <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
+          <i data-lucide="circle-dot" class="w-5 h-5"></i>
+        </div>
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Admin Pannel Demo</span>
+      </div>
+    </div>
+
+    <nav class="px-4 pb-6 space-y-6">
+      <div>
+        <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Dashboards</p>
+        <div class="space-y-1">
+          <!-- Dashboard -->
+          <a href="./index.html" class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-brand-dark text-white font-medium text-base transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-light shrink-0"></i>
+              <span class="sidebar-text">Dashboard</span>
+            </div>
+          </a>
+
+          <!-- Associate -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-associate')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Associate</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-associate" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-associate" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./all-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">All Associate</a>
+              <a href="active-associate.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Active Associate</a>
+              <a href="inactive-associate.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inactive Associate</a>
+              <a href="activation-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Activation History</a>
+            </div>
+          </div>
+
+          <!-- Manage Ads -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-ads')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Manage Ads</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-ads" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-ads" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./todays-ads.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Today's Ads</a>
+             
+            </div>
+          </div>
+
+          <!-- Social Media Status -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-social')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="share-2" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Social Media Status</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-social" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-social" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./social-media-status.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Social Media Status</a>
+              
+            </div>
+          </div>
+
+          <!-- Status Payment List -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-payment')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="credit-card" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Status Payment List</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-payment" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-payment" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./status-payment-list/payment-request-list.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Payment Request List</a>
+              <a href="./status-payment-list/accepted-payment-list.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Payment List</a>
+              <a href="./status-payment-list/rejected-payment-list.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Payment List</a>
+            </div>
+          </div>
+
+          <!-- KYC -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-kyc')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="shield-check" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">KYC</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-kyc" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-kyc" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./kyc/pending-kyc.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending KYC</a>
+              <a href="./kyc/accepted-kyc.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted KYC</a>
+              <a href="./kyc/rejected-kyc.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected KYC</a>
+            </div>
+          </div>
+
+          <!-- Generated Payout -->
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='generated-payout.html'" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="wallet" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generated Payout</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Withdrawal Request -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Withdrawal Request</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./withdrawal-request/pending-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Request</a>
+              <a href="./withdrawal-request/accepted-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Request</a>
+              <a href="./withdrawal-request/rejected-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Request</a>
+            </div>
+          </div>
+
+          <!-- Fund Request -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-fund-request')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="send" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Fund Request</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-fund-request" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-fund-request" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./fund-request/pending-fund-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Request</a>
+              <a href="./fund-request/accepted-fund-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Request</a>
+              <a href="./fund-request/rejected-fund-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Request</a>
+            </div>
+          </div>
+
+          <!-- Fund Transaction -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-fund-transaction')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="banknote" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Fund Transaction</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-fund-transaction" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-fund-transaction" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./fund-transaction/fund-transaction.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transaction</a>
+              <a href="./fund-transaction/transaction-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Transaction History</a>
+              <a href="./fund-transaction/deduction-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Deduction History</a>
+            </div>
+          </div>
+
+          <!-- News & Banner -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-news')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="newspaper" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">News & Banner</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-news" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-news" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./news -banner/add-banner.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Banner & QR Code</a>
+              <a href="./news -banner/add-news.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add News</a>
+             
+            </div>
+          </div>
+
+          <!-- Admin Settings -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-admin-setting')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Admin Settings</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-admin-setting" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-admin-setting" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./admin-setting/withdrawal-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Withdrawal Settings</a>
+              <a href="./admin-setting/daily-ads-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Daily ADS Income Setting</a>
+              <a href="./admin-setting/daily-roi-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Daily ROI Income Setting</a>
+              <a href="./admin-setting/ads-onetime-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">ADS Plan Onetime Setting</a>
+              <a href="./admin-setting/status-onetime-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Status Onetime Setting</a>
+              <a href="./admin-setting/daily-task-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Daily Task Wallet Onetime Setting</a>
+              <a href="./admin-setting/add-social-media-package.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Social Media Package</a>
+              <a href="./admin-setting/manage-social-media-package.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Manage Social Media Package</a>
+              <a href="./admin-setting/add-daily-task-package.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Daily Task Wallet Package</a>
+              <a href="./admin-setting/manage-daily-task-package.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Manage Daily Task Wallet Package</a>
+            </div>
+          </div>
+
+          <!-- Support -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-support')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="headphones" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Support</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-support" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-support" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="./support/inbox.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inbox</a>
+              <a href="./support/outbox.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Outbox</a>
+             
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="sidebar-dropdown">
+            <button onclick="window.location.href='./password.html'"
+ class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="key" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Password</span>
+              </div>
+            
+          </div>
+
+          <!-- Logout -->
+          <div class="sidebar-dropdown">
+            <button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="log-out" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Logout</span>
+              </div>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- header -->
+    <header class="h-16 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-b border-slate-200/60 dark:border-slate-700/60 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
+      <div class="flex items-center space-x-4">
+        <button id="sidebarToggle" onclick="toggleSidebar()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i data-lucide="sidebar" class="w-5 h-5"></i></button>
+        <div class="relative w-64 hidden sm:block"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-1.5 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light"></div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i></button>
+        <div class="flex items-center space-x-1 cursor-pointer"><span class="text-xl">🇬🇧</span></div>
+        <button class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg relative transition"><i data-lucide="bell" class="w-5 h-5"></i><span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">6</span></button>
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover cursor-pointer">
+      </div>
+    </header>
+
+    <!-- ============ MAIN DASHBOARD CARDS (ENHANCED) ============ -->
+    <main class="p-6 space-y-6 overflow-y-auto">
+
+      <!-- --- ENHANCED STATS CARDS --- -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-5">
+
+        <!-- 1. Total Turnover -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Turnover</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">3000</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="trending-up" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">last 30 days</span>
+            <span class="text-xs font-semibold stat-trend-up px-2.5 py-0.5 rounded-full flex items-center gap-1"><i data-lucide="arrow-up" class="w-3 h-3"></i> +12%</span>
+          </div>
+        </div>
+
+        <!-- 2. Total Generated Payout -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Payout</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">250</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="wallet" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">all time</span>
+            <span class="text-xs font-semibold stat-trend-up px-2.5 py-0.5 rounded-full flex items-center gap-1"><i data-lucide="arrow-up" class="w-3 h-3"></i> +8%</span>
+          </div>
+        </div>
+
+        <!-- 3. Onetime Sponsor Payout -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Sponsor Payout</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">—</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="users" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">onetime</span>
+            <span class="text-xs font-semibold text-slate-400 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700">no data</span>
+          </div>
+        </div>
+
+        <!-- 4. Total Daily Payout -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Daily Payout</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">177.5</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="calendar" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">today</span>
+            <span class="text-xs font-semibold stat-trend-down px-2.5 py-0.5 rounded-full flex items-center gap-1"><i data-lucide="arrow-down" class="w-3 h-3"></i> -2%</span>
+          </div>
+        </div>
+
+        <!-- 5. Active Members -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Active Members</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">2</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="user-check" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">active</span>
+            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full">online</span>
+          </div>
+        </div>
+
+        <!-- 6. Inactive Members -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Inactive</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">0</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="user-x" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">inactive</span>
+            <span class="text-xs font-semibold text-slate-400 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700">0%</span>
+          </div>
+        </div>
+
+        <!-- 7. Total Members -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Members</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">2</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="users" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">total</span>
+            <span class="text-xs font-semibold text-slate-400 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700">+0</span>
+          </div>
+        </div>
+
+        <!-- 8. Income Wallet -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Income Wallet</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">177.5</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="credit-card" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">balance</span>
+            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full">available</span>
+          </div>
+        </div>
+
+        <!-- 9. Fund Wallet -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Fund Wallet</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">504</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="piggy-bank" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">balance</span>
+            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full">fund</span>
+          </div>
+        </div>
+
+        <!-- 10. Rebirth Wallet -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Rebirth Wallet</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">15</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="refresh-cw" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">balance</span>
+            <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 rounded-full">rebirth</span>
+          </div>
+        </div>
+
+        <!-- 11. Shopping Wallet -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Shopping Wallet</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">20</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="shopping-bag" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">balance</span>
+            <span class="text-xs font-semibold text-slate-400 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700">store</span>
+          </div>
+        </div>
+
+        <!-- 12. Pending Withdrawal -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Pending Withdrawal</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">0</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="clock" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">pending</span>
+            <span class="text-xs font-semibold text-slate-400 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700">clear</span>
+          </div>
+        </div>
+
+        <!-- 13. Today's Joining -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Today's Joining</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">0</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="user-plus" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">today</span>
+            <span class="text-xs font-semibold text-slate-400 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700">new</span>
+          </div>
+        </div>
+
+        <!-- 14. Today's Turnover -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Today's Turnover</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">0</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="bar-chart" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">today</span>
+            <span class="text-xs font-semibold text-slate-400 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700">0%</span>
+          </div>
+        </div>
+
+        <!-- 15. Today's Generated Payout -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Today's Payout</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">0</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="trending-down" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">today</span>
+            <span class="text-xs font-semibold text-slate-400 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700">none</span>
+          </div>
+        </div>
+
+        <!-- 16. Pending Fund Request -->
+        <div class="stat-card rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Pending Fund Req.</span>
+              <div class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">0</div>
+            </div>
+            <div class="stat-icon"><i data-lucide="send" class="w-5 h-5"></i></div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400">pending</span>
+            <span class="text-xs font-semibold text-slate-400 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700">idle</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ---- chart row (original) ---- -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700/50 transition-colors">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div><h3 class="text-base font-semibold text-slate-900 dark:text-white">Website Visits</h3><div class="flex items-baseline space-x-2 mt-1"><span class="text-2xl font-bold text-slate-900 dark:text-white">$395.7k</span><span class="bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 text-xs font-semibold px-2 py-0.5 rounded-full">+18%</span><span class="text-xs text-slate-400 ml-1">than last year</span></div></div>
+            <div class="flex items-center space-x-4"><div class="flex items-center space-x-3 text-xs font-medium text-slate-600 dark:text-slate-300"><div class="flex items-center space-x-1"><span class="w-2 h-2 rounded-full bg-brand-dark"></span><span>Site A</span></div><div class="flex items-center space-x-1"><span class="w-2 h-2 rounded-full bg-brand-light"></span><span>Site B</span></div></div><select class="border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none"><option>2026</option><option>2025</option></select></div>
+          </div>
+          <div class="h-64 relative"><canvas id="websiteVisitsChart"></canvas></div>
+        </div>
+        <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700/50 flex flex-col justify-between">
+          <h3 class="text-base font-semibold text-slate-900 dark:text-white mb-2">Current Visits</h3>
+          <div class="relative h-52 flex items-center justify-center my-2"><canvas id="currentVisitsChart"></canvas><div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"><span class="text-xs text-slate-400 font-medium">Total</span><span class="text-2xl font-bold text-slate-800 dark:text-white">2458</span></div></div>
+          <div class="space-y-3 mt-2">
+            <div class="flex items-center justify-between text-xs font-medium"><div class="flex items-center space-x-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-dark"></span><span class="text-slate-600 dark:text-slate-300">America</span></div><div class="flex items-center space-x-2"><span class="text-slate-900 dark:text-white font-semibold">1650</span><span class="bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded text-[10px] font-bold">+4.7%</span></div></div>
+            <div class="flex items-center justify-between text-xs font-medium"><div class="flex items-center space-x-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span class="text-slate-600 dark:text-slate-300">Asia</span></div><div class="flex items-center space-x-2"><span class="text-slate-900 dark:text-white font-semibold">350</span><span class="bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded text-[10px] font-bold">+2.1%</span></div></div>
+            <div class="flex items-center justify-between text-xs font-medium"><div class="flex items-center space-x-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-light"></span><span class="text-slate-600 dark:text-slate-300">Europe</span></div><div class="flex items-center space-x-2"><span class="text-slate-900 dark:text-white font-semibold">498</span><span class="bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400 px-1.5 py-0.5 rounded text-[10px] font-bold">-1.7%</span></div></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    lucide.createIcons();
+
+    let visitsChart;
+
+    function toggleDropdown(id) {
+      const targetMenu = document.getElementById(id);
+      const targetIcon = document.getElementById('icon-' + id);
+      document.querySelectorAll('.sidebar-dropdown > div').forEach(el => {
+        if (el.id !== id && !el.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          const otherIcon = document.getElementById('icon-' + el.id);
+          if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+        }
+      });
+      if (targetMenu.classList.contains('hidden')) {
+        targetMenu.classList.remove('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(180deg)';
+      } else {
+        targetMenu.classList.add('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    let isSidebarCollapsed = false;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const textElements = document.querySelectorAll('.sidebar-text');
+      isSidebarCollapsed = !isSidebarCollapsed;
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-20');
+        textElements.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-80');
+        textElements.forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      const themeIcon = document.getElementById('themeIcon');
+      if (isDark) themeIcon.setAttribute('data-lucide', 'sun');
+      else themeIcon.setAttribute('data-lucide', 'moon');
+      lucide.createIcons();
+      if (visitsChart) {
+        visitsChart.options.scales.y.grid.color = isDark ? '#334155' : '#f1f5f9';
+        visitsChart.update();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const ctxBar = document.getElementById('websiteVisitsChart').getContext('2d');
+      visitsChart = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          datasets: [
+            { label: 'Site A', data: [2200, 4200, 3900, 3600, 2400, 4100, 2300, 3900, 3500, 4100, 3800, 2400], backgroundColor: '#0e4a3d', borderRadius: 4, barThickness: 12 },
+            { label: 'Site B', data: [2300, 2600, 2900, 3100, 2800, 2800, 2900, 3900, 2100, 2500, 2100, 4100], backgroundColor: '#b6f059', borderRadius: 4, barThickness: 12 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { stacked: true, grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } },
+            y: { stacked: true, grid: { color: '#f1f5f9' }, border: { dash: [4, 4] }, ticks: { color: '#94a3b8', font: { size: 11 }, callback: (val) => val / 1000 + 'k' } }
+          }
+        }
+      });
+
+      const ctxDonut = document.getElementById('currentVisitsChart').getContext('2d');
+      new Chart(ctxDonut, {
+        type: 'doughnut',
+        data: {
+          labels: ['America', 'Asia', 'Europe'],
+          datasets: [{ data: [1650, 350, 498], backgroundColor: ['#0e4a3d', '#f59e0b', '#b6f059'], borderWidth: 0, hoverOffset: 4 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '78%', plugins: { legend: { display: false } } }
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pending Help Request / Link · Auto Repurchase Demo</title>
+
+  <!-- Tailwind + fonts + icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#0e4a3d',
+              light: '#b6f059',
+              bg: '#f4f6f8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    #sidebar nav .sidebar-dropdown>button { padding-top: .7rem; padding-bottom: .7rem; font-size: 1rem; }
+    #sidebar nav .sidebar-dropdown>button>div>i,
+    #sidebar nav .sidebar-dropdown>button>i { width: 1.4rem; height: 1.4rem; }
+    #sidebar nav .sidebar-dropdown>div { font-size: .875rem; }
+
+    /* ---- table row hover ---- */
+    .link-table tbody tr {
+      transition: background-color 0.15s ease;
+    }
+    .link-table tbody tr:hover {
+      background-color: rgba(14, 74, 61, 0.04);
+    }
+    .dark .link-table tbody tr:hover {
+      background-color: rgba(182, 240, 89, 0.05);
+    }
+
+    /* ---- scrollable table container ---- */
+    .table-scroll-container {
+      overflow-x: auto;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-scroll-container::-webkit-scrollbar {
+      height: 8px;
+    }
+    .table-scroll-container::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 8px;
+    }
+    .table-scroll-container::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 8px;
+    }
+    .dark .table-scroll-container::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    .dark .table-scroll-container::-webkit-scrollbar-thumb {
+      background: #475569;
+    }
+
+    /* ---- pagination active ---- */
+    .page-active {
+      background-color: #0e4a3d;
+      color: #fff;
+      border-color: #0e4a3d;
+      box-shadow: 0 4px 10px rgba(14, 74, 61, 0.3);
+    }
+    .dark .page-active {
+      background-color: #b6f059;
+      color: #0e4a3d;
+      border-color: #b6f059;
+      box-shadow: 0 4px 10px rgba(182, 240, 89, 0.3);
+    }
+
+    /* ---- glass card ---- */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(226, 232, 240, 0.5);
+    }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      border-color: rgba(51, 65, 85, 0.5);
+    }
+
+    /* ---- member chip ---- */
+    .member-chip {
+      font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #0f172a;
+      background: rgba(241, 245, 249, 0.8);
+      padding: 3px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      display: inline-block;
+      white-space: nowrap;
+    }
+    .dark .member-chip {
+      color: #e2e8f0;
+      background: rgba(51, 65, 85, 0.5);
+      border-color: rgba(71, 85, 105, 0.6);
+    }
+
+    /* ---- status badge ---- */
+    .badge-pending {
+      background: #f59e0b;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 9999px;
+      display: inline-block;
+      line-height: 1.6;
+      white-space: nowrap;
+    }
+    .badge-approved {
+      background: #0e4a3d;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 9999px;
+      display: inline-block;
+      line-height: 1.6;
+      white-space: nowrap;
+    }
+    .dark .badge-approved {
+      background: #b6f059;
+      color: #0e4a3d;
+    }
+    .badge-rejected {
+      background: #f43f5e;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 9999px;
+      display: inline-block;
+      line-height: 1.6;
+      white-space: nowrap;
+    }
+
+    /* ---- action buttons ---- */
+    .btn-action {
+      width: 30px;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .btn-del {
+      background: rgba(244, 63, 94, 0.1);
+      color: #f43f5e;
+    }
+    .btn-del:hover {
+      background: rgba(244, 63, 94, 0.2);
+    }
+    .dark .btn-del {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+    }
+    .dark .btn-del:hover {
+      background: rgba(244, 63, 94, 0.25);
+    }
+
+    .btn-view {
+      background: rgba(14, 74, 61, 0.08);
+      color: #0e4a3d;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-view:hover {
+      background: rgba(14, 74, 61, 0.15);
+    }
+    .dark .btn-view {
+      background: rgba(182, 240, 89, 0.12);
+      color: #b6f059;
+    }
+    .dark .btn-view:hover {
+      background: rgba(182, 240, 89, 0.2);
+    }
+
+    /* ---- attachment link ---- */
+    .attachment-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #0e4a3d;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .attachment-link:hover {
+      color: #0b3a30;
+      text-decoration: underline;
+    }
+    .dark .attachment-link {
+      color: #b6f059;
+    }
+    .dark .attachment-link:hover {
+      color: #a3d94c;
+    }
+
+    /* ---- amount ---- */
+    .amount-badge {
+      font-weight: 700;
+      font-size: 13px;
+      color: #0e4a3d;
+      white-space: nowrap;
+    }
+    .dark .amount-badge { color: #b6f059; }
+  </style>
+</head>
+
+<body class="bg-[#f4f6f8] dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex transition-colors duration-200">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside id="sidebar" class="w-80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-slate-200/60 dark:border-slate-700/60 flex flex-col shrink-0 h-screen sticky top-0 custom-scrollbar overflow-y-auto transition-all duration-300 z-20">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3 sidebar-text">
+        <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
+          <i data-lucide="circle-dot" class="w-5 h-5"></i>
+        </div>
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Auto Repurchase Demo</span>
+      </div>
+    </div>
+
+    <nav class="px-4 pb-6 space-y-6">
+      <div>
+        <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Dashboards</p>
+        <div class="space-y-1">
+          <!-- Dashboard -->
+          <a href="../index.html" class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-brand-dark text-white font-medium text-base transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-light shrink-0"></i>
+              <span class="sidebar-text">Dashboard</span>
+            </div>
+          </a>
+
+          <!-- Associates -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-associate')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Associates</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-associate" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-associate" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../associates/all-associates.html" class="block py-1.5 text-brand-dark dark:text-brand-light font-semibold">All Associates</a>
+              <a href="../associates/active-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Active Associates</a>
+              <a href="../associates/inactive-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inactive Associates</a>
+              <a href="../associates/diamond-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Diamond Associates</a>
+              <a href="../associates/tree-view.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Tree View</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../upgrade-table.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Upgrade Table</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../generate-withdrawal-link.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generate Withdrawal Link</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Withdrawal Requests -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-ads')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Withdrawal Requests</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-ads" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-ads" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../withdrawal-request/pending-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Withdrawal Links</a>
+              <a href="../withdrawal-request/accepted-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Withdrawal Links</a>
+              <a href="../withdrawal-request/unassigned-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Unassigned Withdrawal Links</a>
+            </div>
+          </div>
+
+          <!-- E-Pin -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-admin-transaction')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">E-Pin</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-admin-transaction" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-admin-transaction" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../e-pin/generate-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Generate E-Pin</a>
+              <a href="../e-pin/manage-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Manage E-Pin</a>
+              <a href="../e-pin/request-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Requested E-Pin</a>
+              <a href="../e-pin/transferred-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Transferred E-Pin</a>
+              <a href="../e-pin/used-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Used E-Pin</a>
+              <a href="../e-pin/unused-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Unused E-Pin</a>
+            </div>
+          </div>
+
+          <!-- Fund Transfer / Rank & Royalty -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Fund Transfer</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../fund-transfer/fund-transfer.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transfer</a>
+              <a href="../fund-transfer/transfer-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Transfer History</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../wallet-deduction.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Wallet Deduction</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Generated Payout -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-bonus-request')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="send" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generated Payout</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-bonus-request" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-bonus-request" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../generated-payouts/payout-table.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Payout Table</a>
+            </div>
+          </div>
+
+          <!-- Notice -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-capital-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="banknote" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Notice</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-capital-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-capital-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../notice/dashboard-notice.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Dashboard Notice</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../support.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Support</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../change-password.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="lock" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Change Password</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Logout -->
+          <div class="sidebar-dropdown">
+            <button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="log-out" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Logout</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- header -->
+    <header class="h-16 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-b border-slate-200/60 dark:border-slate-700/60 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
+      <div class="flex items-center space-x-4">
+        <button id="sidebarToggle" onclick="toggleSidebar()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i data-lucide="sidebar" class="w-5 h-5"></i></button>
+        <div class="relative w-64 hidden sm:block"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-1.5 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light"></div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i></button>
+        <div class="flex items-center space-x-1 cursor-pointer"><span class="text-xl">🇬🇧</span></div>
+        <button class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg relative transition"><i data-lucide="bell" class="w-5 h-5"></i><span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">6</span></button>
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover cursor-pointer">
+      </div>
+    </header>
+
+    <!-- ============ MAIN – PENDING HELP REQUEST / LINK ============ -->
+    <main class="p-6 space-y-6 overflow-y-auto">
+
+      <!-- Card: Pending Help Request / Link -->
+      <div class="glass-card rounded-2xl shadow-sm p-5 transition-colors">
+
+        <!-- Header row: title + actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h2 class="text-base font-bold uppercase tracking-wide text-slate-800 dark:text-slate-100">Pending Help Request / Link</h2>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-brand-dark text-white hover:bg-[#0b3a30] transition shadow-sm dark:bg-brand-light dark:text-brand-dark dark:hover:bg-[#a3d94c]">Search Table</button>
+            <button class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-brand-dark text-white hover:bg-[#0b3a30] transition shadow-sm dark:bg-brand-light dark:text-brand-dark dark:hover:bg-[#a3d94c]">Export Table</button>
+            <span class="w-4 h-4 rounded-full bg-brand-light inline-block border border-brand-light/50"></span>
+            <span class="w-4 h-4 rounded-full bg-brand-dark inline-block border border-brand-dark/30 dark:bg-brand-light"></span>
+            <span class="w-4 h-4 rounded-full bg-emerald-400 inline-block border border-emerald-500/30"></span>
+          </div>
+        </div>
+
+        <!-- Search + Show entries -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div class="relative w-full sm:w-72">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" placeholder="Search" class="w-full pl-9 pr-4 py-2 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light" />
+          </div>
+          <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+            <span>Show</span>
+            <select class="border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-brand-dark dark:focus:border-brand-light">
+              <option>10</option>
+              <option>25</option>
+              <option>50</option>
+              <option>100</option>
+            </select>
+            <span>entries</span>
+          </div>
+        </div>
+
+        <!-- === TABLE === -->
+        <div class="table-scroll-container custom-scrollbar -mx-5 px-5">
+          <table class="link-table w-full min-w-[1200px] text-sm border-collapse">
+            <thead>
+              <tr class="bg-brand-dark text-white text-xs uppercase tracking-wider">
+                <th class="px-3 py-3 text-left font-semibold whitespace-nowrap border-r border-white/10">SI <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-3 text-left font-semibold whitespace-nowrap border-r border-white/10">Del Link <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-3 text-left font-semibold whitespace-nowrap border-r border-white/10">Action <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-3 text-left font-semibold whitespace-nowrap border-r border-white/10">Pay To <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-3 text-left font-semibold whitespace-nowrap border-r border-white/10">Pay By <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-3 text-left font-semibold whitespace-nowrap border-r border-white/10">Level <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-3 text-left font-semibold whitespace-nowrap border-r border-white/10">Pay Mode <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-3 text-left font-semibold whitespace-nowrap border-r border-white/10">Paid Amount <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-3 text-left font-semibold whitespace-nowrap border-r border-white/10">Attachment <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-3 text-left font-semibold whitespace-nowrap">Status <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200 text-[13px]">
+
+              <!-- Row 1 -->
+              <tr>
+                <td class="px-3 py-3.5 whitespace-nowrap font-medium text-slate-500 dark:text-slate-400">1</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-del btn-action" title="Delete link">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-view">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> View
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN754802</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN5001</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">1</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">Bank Transfer</td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="amount-badge">500</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <a href="#" class="attachment-link">
+                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> receipt.pdf
+                  </a>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="badge-pending">Pending</span></td>
+              </tr>
+
+              <!-- Row 2 -->
+              <tr>
+                <td class="px-3 py-3.5 whitespace-nowrap font-medium text-slate-500 dark:text-slate-400">2</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-del btn-action" title="Delete link">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-view">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> View
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN643938</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN355335</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">UPI</td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="amount-badge">1200</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <a href="#" class="attachment-link">
+                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> invoice.jpg
+                  </a>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="badge-pending">Pending</span></td>
+              </tr>
+
+              <!-- Row 3 -->
+              <tr>
+                <td class="px-3 py-3.5 whitespace-nowrap font-medium text-slate-500 dark:text-slate-400">3</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-del btn-action" title="Delete link">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-view">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> View
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN817851</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN291414</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">1</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">Bank Transfer</td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="amount-badge">500</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <a href="#" class="attachment-link">
+                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> proof.png
+                  </a>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="badge-approved">Approved</span></td>
+              </tr>
+
+              <!-- Row 4 -->
+              <tr>
+                <td class="px-3 py-3.5 whitespace-nowrap font-medium text-slate-500 dark:text-slate-400">4</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-del btn-action" title="Delete link">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-view">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> View
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN362706</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN160927</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">3</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">Cheque</td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="amount-badge">2500</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <a href="#" class="attachment-link">
+                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> cheque.pdf
+                  </a>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="badge-pending">Pending</span></td>
+              </tr>
+
+              <!-- Row 5 -->
+              <tr>
+                <td class="px-3 py-3.5 whitespace-nowrap font-medium text-slate-500 dark:text-slate-400">5</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-del btn-action" title="Delete link">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-view">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> View
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN694061</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN595131</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">1</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">UPI</td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="amount-badge">800</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <a href="#" class="attachment-link">
+                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> screenshot.png
+                  </a>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="badge-rejected">Rejected</span></td>
+              </tr>
+
+              <!-- Row 6 -->
+              <tr>
+                <td class="px-3 py-3.5 whitespace-nowrap font-medium text-slate-500 dark:text-slate-400">6</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-del btn-action" title="Delete link">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-view">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> View
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN169378</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN860472</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">Bank Transfer</td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="amount-badge">1500</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <a href="#" class="attachment-link">
+                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> receipt2.pdf
+                  </a>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="badge-pending">Pending</span></td>
+              </tr>
+
+              <!-- Row 7 -->
+              <tr>
+                <td class="px-3 py-3.5 whitespace-nowrap font-medium text-slate-500 dark:text-slate-400">7</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-del btn-action" title="Delete link">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <button class="btn-view">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> View
+                  </button>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN618886</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="member-chip">WIN327902</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">1</td>
+                <td class="px-3 py-3.5 whitespace-nowrap">UPI</td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="amount-badge">500</span></td>
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <a href="#" class="attachment-link">
+                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> upi.jpg
+                  </a>
+                </td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="badge-approved">Approved</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer: showing entries + pagination -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 text-sm text-slate-600 dark:text-slate-400">
+          <div>Showing <span class="font-semibold text-slate-800 dark:text-slate-200">1</span> to <span class="font-semibold text-slate-800 dark:text-slate-200">7</span> of <span class="font-semibold text-slate-800 dark:text-slate-200">7</span> entries</div>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition text-xs font-medium">&lt;</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg page-active text-xs font-semibold">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition text-xs font-medium">&gt;</button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    lucide.createIcons();
+
+    function toggleDropdown(id) {
+      const targetMenu = document.getElementById(id);
+      const targetIcon = document.getElementById('icon-' + id);
+      document.querySelectorAll('.sidebar-dropdown > div').forEach(el => {
+        if (el.id !== id && !el.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          const otherIcon = document.getElementById('icon-' + el.id);
+          if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+        }
+      });
+      if (targetMenu.classList.contains('hidden')) {
+        targetMenu.classList.remove('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(180deg)';
+      } else {
+        targetMenu.classList.add('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    let isSidebarCollapsed = false;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const textElements = document.querySelectorAll('.sidebar-text');
+      isSidebarCollapsed = !isSidebarCollapsed;
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-20');
+        textElements.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-80');
+        textElements.forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      const themeIcon = document.getElementById('themeIcon');
+      if (isDark) themeIcon.setAttribute('data-lucide', 'sun');
+      else themeIcon.setAttribute('data-lucide', 'moon');
+      lucide.createIcons();
+    }
+
+    // Open Withdrawal Requests dropdown on load + highlight Pending
+    document.addEventListener('DOMContentLoaded', function() {
+      const adsMenu = document.getElementById('dash-ads');
+      const adsIcon = document.getElementById('icon-dash-ads');
+      if (adsMenu && adsMenu.classList.contains('hidden')) {
+        adsMenu.classList.remove('hidden');
+        if (adsIcon) adsIcon.style.transform = 'rotate(180deg)';
+      }
+    });
+  </script>
+
+</body>
+</html>

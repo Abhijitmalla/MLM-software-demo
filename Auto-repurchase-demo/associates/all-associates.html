@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Associates · Auto Repurchase Demo</title>
+
+  <!-- Tailwind + fonts + icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#0e4a3d',
+              light: '#b6f059',
+              bg: '#f4f6f8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    #sidebar nav .sidebar-dropdown>button { padding-top: .7rem; padding-bottom: .7rem; font-size: 1rem; }
+    #sidebar nav .sidebar-dropdown>button>div>i,
+    #sidebar nav .sidebar-dropdown>button>i { width: 1.4rem; height: 1.4rem; }
+    #sidebar nav .sidebar-dropdown>div { font-size: .875rem; }
+
+    /* ---- table row hover ---- */
+    .associate-table tbody tr:hover {
+      background-color: rgba(14, 74, 61, 0.04);
+      transition: background-color 0.15s ease;
+    }
+    .dark .associate-table tbody tr:hover {
+      background-color: rgba(182, 240, 89, 0.05);
+    }
+
+    /* ---- scrollable table container ---- */
+    .table-scroll-container {
+      overflow-x: auto;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-scroll-container::-webkit-scrollbar {
+      height: 8px;
+    }
+    .table-scroll-container::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 8px;
+    }
+    .table-scroll-container::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 8px;
+    }
+    .dark .table-scroll-container::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    .dark .table-scroll-container::-webkit-scrollbar-thumb {
+      background: #475569;
+    }
+
+    /* ---- pagination active ---- */
+    .page-active {
+      background-color: #0e4a3d;
+      color: #fff;
+      border-color: #0e4a3d;
+    }
+    .dark .page-active {
+      background-color: #b6f059;
+      color: #0e4a3d;
+      border-color: #b6f059;
+    }
+
+    /* ---- dashboard pill (brand dark) ---- */
+    .pill-dashboard {
+      background: #0e4a3d;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 9999px;
+      display: inline-block;
+      line-height: 1.6;
+      letter-spacing: 0.02em;
+      transition: all 0.2s;
+    }
+    .pill-dashboard:hover {
+      background: #0b3a30;
+      box-shadow: 0 2px 8px rgba(14, 74, 61, 0.35);
+    }
+    .dark .pill-dashboard {
+      background: #b6f059;
+      color: #0e4a3d;
+    }
+    .dark .pill-dashboard:hover {
+      background: #a3d94c;
+      box-shadow: 0 2px 8px rgba(182, 240, 89, 0.3);
+    }
+
+    .badge-active {
+      background: #b6f059;
+      color: #0e4a3d;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      display: inline-block;
+      line-height: 1.7;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-open {
+      background: #0e4a3d;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 14px;
+      border-radius: 9999px;
+      display: inline-block;
+      line-height: 1.6;
+    }
+    .dark .badge-open {
+      background: #b6f059;
+      color: #0e4a3d;
+    }
+    .badge-close {
+      background: #f43f5e;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 14px;
+      border-radius: 9999px;
+      display: inline-block;
+      line-height: 1.6;
+    }
+
+    /* ---- glass card (matches stat-card / chart cards) ---- */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(226, 232, 240, 0.5);
+    }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      border-color: rgba(51, 65, 85, 0.5);
+    }
+  </style>
+</head>
+
+<body class="bg-[#f4f6f8] dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex transition-colors duration-200">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside id="sidebar" class="w-80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-slate-200/60 dark:border-slate-700/60 flex flex-col shrink-0 h-screen sticky top-0 custom-scrollbar overflow-y-auto transition-all duration-300 z-20">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3 sidebar-text">
+        <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
+          <i data-lucide="circle-dot" class="w-5 h-5"></i>
+        </div>
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Auto Repurchase Demo</span>
+      </div>
+    </div>
+
+    <nav class="px-4 pb-6 space-y-6">
+      <div>
+        <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Dashboards</p>
+        <div class="space-y-1">
+          <!-- Dashboard -->
+          <a href="../index.html" class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-brand-dark text-white font-medium text-base transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-light shrink-0"></i>
+              <span class="sidebar-text">Dashboard</span>
+            </div>
+          </a>
+
+          <!-- Associates -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-associate')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Associates</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-associate" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-associate" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../associates/all-associates.html" class="block py-1.5 text-brand-dark dark:text-brand-light font-semibold">All Associates</a>
+              <a href="../associates/active-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Active Associates</a>
+              <a href="../associates/inactive-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inactive Associates</a>
+              <a href="../associates/diamond-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Diamond Associates</a>
+              <a href="../associates/tree-view.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Tree View</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../upgrade-table.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Upgrade Table</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../generate-withdrawal-link.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generate Withdrawal Link</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Withdrawal Requests -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-ads')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Withdrawal Requests</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-ads" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-ads" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../withdrawal-request/pending-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Withdrawal Links</a>
+              <a href="../withdrawal-request/accepted-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Withdrawal Links</a>
+              <a href="../withdrawal-request/unassigned-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Unassigned Withdrawal Links</a>
+            </div>
+          </div>
+
+          <!-- E-Pin -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-admin-transaction')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">E-Pin</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-admin-transaction" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-admin-transaction" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../e-pin/generate-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Generate E-Pin</a>
+              <a href="../e-pin/manage-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Manage E-Pin</a>
+              <a href="../e-pin/request-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Requested E-Pin</a>
+              <a href="../e-pin/transferred-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Transferred E-Pin</a>
+              <a href="../e-pin/used-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Used E-Pin</a>
+              <a href="../e-pin/unused-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Unused E-Pin</a>
+            </div>
+          </div>
+
+          <!-- Fund Transfer / Rank & Royalty -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Fund Transfer</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../fund-transfer/fund-transfer.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transfer</a>
+              <a href="../fund-transfer/transfer-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Transfer History</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../wallet-deduction.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Wallet Deduction</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Generated Payout -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-bonus-request')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="send" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generated Payout</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-bonus-request" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-bonus-request" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../generated-payouts/payout-table.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Payout Table</a>
+            </div>
+          </div>
+
+          <!-- Notice -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-capital-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="banknote" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Notice</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-capital-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-capital-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../notice/dashboard-notice.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Dashboard Notice</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../support.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Support</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../change-password.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="lock" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Change Password</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Logout -->
+          <div class="sidebar-dropdown">
+            <button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="log-out" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Logout</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- header -->
+    <header class="h-16 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-b border-slate-200/60 dark:border-slate-700/60 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
+      <div class="flex items-center space-x-4">
+        <button id="sidebarToggle" onclick="toggleSidebar()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i data-lucide="sidebar" class="w-5 h-5"></i></button>
+        <div class="relative w-64 hidden sm:block"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-1.5 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light"></div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i></button>
+        <div class="flex items-center space-x-1 cursor-pointer"><span class="text-xl">🇬🇧</span></div>
+        <button class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg relative transition"><i data-lucide="bell" class="w-5 h-5"></i><span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">6</span></button>
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover cursor-pointer">
+      </div>
+    </header>
+
+    <!-- ============ MAIN – ALL ASSOCIATES ============ -->
+    <main class="p-6 space-y-6 overflow-y-auto">
+
+      <!-- Card: All Associates Table -->
+      <div class="glass-card rounded-2xl shadow-sm p-5 transition-colors">
+
+        <!-- Header row: title + actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h2 class="text-base font-bold uppercase tracking-wide text-slate-800 dark:text-slate-100">All Associates</h2>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-brand-dark text-white hover:bg-[#0b3a30] transition shadow-sm dark:bg-brand-light dark:text-brand-dark dark:hover:bg-[#a3d94c]">Search Table</button>
+            <button class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-brand-dark text-white hover:bg-[#0b3a30] transition shadow-sm dark:bg-brand-light dark:text-brand-dark dark:hover:bg-[#a3d94c]">Export Table</button>
+            <span class="w-4 h-4 rounded-full bg-brand-light inline-block border border-brand-light/50"></span>
+            <span class="w-4 h-4 rounded-full bg-brand-dark inline-block border border-brand-dark/30 dark:bg-brand-light"></span>
+            <span class="w-4 h-4 rounded-full bg-emerald-400 inline-block border border-emerald-500/30"></span>
+          </div>
+        </div>
+
+        <!-- Search + Show entries -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div class="relative w-full sm:w-72">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" placeholder="Search" class="w-full pl-9 pr-4 py-2 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light" />
+          </div>
+          <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+            <span>Show</span>
+            <select class="border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-brand-dark dark:focus:border-brand-light">
+              <option>10</option>
+              <option>25</option>
+              <option>50</option>
+              <option>100</option>
+            </select>
+            <span>entries</span>
+          </div>
+        </div>
+
+        <!-- === TABLE === -->
+        <div class="table-scroll-container custom-scrollbar -mx-5 px-5">
+          <table class="associate-table min-w-[1600px] w-full text-sm border-collapse">
+            <thead>
+              <tr class="bg-brand-dark text-white text-xs uppercase tracking-wider">
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">SI <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Dashboard <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Member ID <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Name <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Password <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Mobile <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Sponsor ID <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Parent ID <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Position <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Left Leg <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Right Leg <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Login Status <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Pool <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Wallet <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Address <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Joining Date/Time <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Active Sponsor <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap border-r border-white/10">Account <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+                <th class="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Profile <i data-lucide="arrow-up-down" class="w-3 h-3 inline ml-0.5 opacity-70"></i></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200 text-[13px]">
+
+              <!-- Row 1 -->
+              <tr>
+                <td class="px-3 py-2.5 whitespace-nowrap">1</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="pill-dashboard">Dashboard</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">WIN5001</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">
+                  <span class="badge-active">active</span>
+                  <span class="ml-2 text-slate-800 dark:text-slate-200">demohelpin</span>
+                </td>
+                <td class="px-3 py-2.5 whitespace-nowrap">123456</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">1234567890</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">0</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">0</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">top</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">717</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">195</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="badge-open">Open</span></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">6</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">30000.00</td>
+                <td class="px-3 py-2.5 whitespace-nowrap text-slate-400">test</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">2022-08-08 06:51:13</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+              </tr>
+
+              <!-- Row 2 -->
+              <tr>
+                <td class="px-3 py-2.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="pill-dashboard">Dashboard</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">WIN355335</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">
+                  <span class="badge-active">active</span>
+                  <span class="ml-2 text-slate-800 dark:text-slate-200">demohelpin</span>
+                </td>
+                <td class="px-3 py-2.5 whitespace-nowrap">123456</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">1234567890</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN5001</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN5001</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">left</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">685</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">31</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="badge-open">Open</span></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">6</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">25600.00</td>
+                <td class="px-3 py-2.5 whitespace-nowrap text-slate-400"></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">10-09-2022 06:07:10 PM</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+              </tr>
+
+              <!-- Row 3 -->
+              <tr>
+                <td class="px-3 py-2.5 whitespace-nowrap">3</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="pill-dashboard">Dashboard</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">WIN291414</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">
+                  <span class="badge-active">active</span>
+                  <span class="ml-2 text-slate-800 dark:text-slate-200">demohelpin</span>
+                </td>
+                <td class="px-3 py-2.5 whitespace-nowrap">123456</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">1234567890</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN5001</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN5001</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">right</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">36</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">158</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="badge-open">Open</span></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">6</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">26600.00</td>
+                <td class="px-3 py-2.5 whitespace-nowrap text-slate-400"></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">10-09-2022 06:09:15 PM</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+              </tr>
+
+              <!-- Row 4 -->
+              <tr>
+                <td class="px-3 py-2.5 whitespace-nowrap">4</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="pill-dashboard">Dashboard</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">WIN160927</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">
+                  <span class="badge-active">active</span>
+                  <span class="ml-2 text-slate-800 dark:text-slate-200">demohelpin</span>
+                </td>
+                <td class="px-3 py-2.5 whitespace-nowrap">123456</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">1234567890</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN355335</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN355335</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">left</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">660</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">24</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="badge-open">Open</span></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">6</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">31000.00</td>
+                <td class="px-3 py-2.5 whitespace-nowrap text-slate-400"></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">10-09-2022 06:10:10 PM</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+              </tr>
+
+              <!-- Row 5 -->
+              <tr>
+                <td class="px-3 py-2.5 whitespace-nowrap">5</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="pill-dashboard">Dashboard</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">WIN595131</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">
+                  <span class="badge-active">active</span>
+                  <span class="ml-2 text-slate-800 dark:text-slate-200">demohelpin</span>
+                </td>
+                <td class="px-3 py-2.5 whitespace-nowrap">123456</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">1234567890</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN355335</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN355335</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">right</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">15</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">15</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="badge-open">Open</span></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">6</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">29500.00</td>
+                <td class="px-3 py-2.5 whitespace-nowrap text-slate-400"></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">10-09-2022 06:11:17 PM</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+              </tr>
+
+              <!-- Row 6 -->
+              <tr>
+                <td class="px-3 py-2.5 whitespace-nowrap">6</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="pill-dashboard">Dashboard</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">WIN860472</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">
+                  <span class="badge-active">active</span>
+                  <span class="ml-2 text-slate-800 dark:text-slate-200">demohelpin</span>
+                </td>
+                <td class="px-3 py-2.5 whitespace-nowrap">123456</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">1234567890</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN291414</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN291414</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">left</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">20</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">15</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="badge-open">Open</span></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">6</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">29600.00</td>
+                <td class="px-3 py-2.5 whitespace-nowrap text-slate-400"></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">10-09-2022 06:13:26 PM</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+              </tr>
+
+              <!-- Row 7 -->
+              <tr>
+                <td class="px-3 py-2.5 whitespace-nowrap">7</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="pill-dashboard">Dashboard</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">WIN327902</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">
+                  <span class="badge-active">active</span>
+                  <span class="ml-2 text-slate-800 dark:text-slate-200">demohelpin</span>
+                </td>
+                <td class="px-3 py-2.5 whitespace-nowrap">123456</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">1234567890</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN291414</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN291414</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">right</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">15</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">142</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="badge-close">Close</span></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">6</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">30600.00</td>
+                <td class="px-3 py-2.5 whitespace-nowrap text-slate-400"></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">10-09-2022 06:14:04 PM</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+              </tr>
+
+              <!-- Row 8 -->
+              <tr>
+                <td class="px-3 py-2.5 whitespace-nowrap">8</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="pill-dashboard">Dashboard</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">WIN471289</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">
+                  <span class="badge-active">active</span>
+                  <span class="ml-2 text-slate-800 dark:text-slate-200">demohelpin</span>
+                </td>
+                <td class="px-3 py-2.5 whitespace-nowrap">123456</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">1234567890</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN160927</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN160927</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">left</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">608</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">51</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="badge-open">Open</span></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">6</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">28000.00</td>
+                <td class="px-3 py-2.5 whitespace-nowrap text-slate-400"></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">10-09-2022 06:21:53 PM</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+              </tr>
+
+              <!-- Row 9 -->
+              <tr>
+                <td class="px-3 py-2.5 whitespace-nowrap">9</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="pill-dashboard">Dashboard</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">WIN805845</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">
+                  <span class="badge-active">active</span>
+                  <span class="ml-2 text-slate-800 dark:text-slate-200">demohelpin</span>
+                </td>
+                <td class="px-3 py-2.5 whitespace-nowrap">123456</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">1234567890</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN160927</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN160927</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">right</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">16</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">7</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="badge-open">Open</span></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">6</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">28000.00</td>
+                <td class="px-3 py-2.5 whitespace-nowrap text-slate-400"></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">10-09-2022 06:24:08 PM</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+              </tr>
+
+              <!-- Row 10 -->
+              <tr>
+                <td class="px-3 py-2.5 whitespace-nowrap">10</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="pill-dashboard">Dashboard</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">WIN970261</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">
+                  <span class="badge-active">active</span>
+                  <span class="ml-2 text-slate-800 dark:text-slate-200">demohelpin</span>
+                </td>
+                <td class="px-3 py-2.5 whitespace-nowrap">123456</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">1234567890</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN595131</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">WIN595131</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">left</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">7</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">7</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="badge-open">Open</span></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">6</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">31000.00</td>
+                <td class="px-3 py-2.5 whitespace-nowrap text-slate-400"></td>
+                <td class="px-3 py-2.5 whitespace-nowrap">10-09-2022 06:27:57 PM</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">2</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><a href="#" class="text-brand-dark dark:text-brand-light hover:underline">Edit</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer: showing entries + pagination -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 text-sm text-slate-600 dark:text-slate-400">
+          <div>Showing 1 to 10 of 980 entries</div>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition text-xs font-medium">&lt;</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg page-active text-xs font-semibold">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition text-xs font-medium">2</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition text-xs font-medium">3</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition text-xs font-medium">4</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition text-xs font-medium">5</button>
+            <span class="w-8 h-8 flex items-center justify-center text-slate-400 text-xs">…</span>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition text-xs font-medium">98</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition text-xs font-medium">&gt;</button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    lucide.createIcons();
+
+    function toggleDropdown(id) {
+      const targetMenu = document.getElementById(id);
+      const targetIcon = document.getElementById('icon-' + id);
+      document.querySelectorAll('.sidebar-dropdown > div').forEach(el => {
+        if (el.id !== id && !el.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          const otherIcon = document.getElementById('icon-' + el.id);
+          if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+        }
+      });
+      if (targetMenu.classList.contains('hidden')) {
+        targetMenu.classList.remove('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(180deg)';
+      } else {
+        targetMenu.classList.add('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    let isSidebarCollapsed = false;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const textElements = document.querySelectorAll('.sidebar-text');
+      isSidebarCollapsed = !isSidebarCollapsed;
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-20');
+        textElements.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-80');
+        textElements.forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      const themeIcon = document.getElementById('themeIcon');
+      if (isDark) themeIcon.setAttribute('data-lucide', 'sun');
+      else themeIcon.setAttribute('data-lucide', 'moon');
+      lucide.createIcons();
+    }
+
+    // Initialize the Associates dropdown as open on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const assocMenu = document.getElementById('dash-associate');
+      const assocIcon = document.getElementById('icon-dash-associate');
+      if (assocMenu && assocMenu.classList.contains('hidden')) {
+        assocMenu.classList.remove('hidden');
+        if (assocIcon) assocIcon.style.transform = 'rotate(180deg)';
+      }
+    });
+  </script>
+
+</body>
+</html>

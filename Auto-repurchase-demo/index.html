@@ -89,7 +89,7 @@
         <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
           <i data-lucide="circle-dot" class="w-5 h-5"></i>
         </div>
-        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Downline Tree Demo</span>
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Auto Repurchase Demo</span>
       </div>
     </div>
 
@@ -110,135 +110,118 @@
             <button onclick="toggleDropdown('dash-associate')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
               <div class="flex items-center space-x-3">
                 <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Client</span>
+                <span class="sidebar-text">Associates</span>
               </div>
               <i data-lucide="chevron-down" id="icon-dash-associate" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
             </button>
             <div id="dash-associate" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
-              <a href="./client/all-client.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">All Clients</a>
-              <a href="./client/active-client.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Active Client</a>
-              <a href="./client/inactive-client.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inactive Client</a>
-              <a href="./client/activation-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Activation History</a>
+              <a href="./associates/all-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">All Associates</a>
+              <a href="./associates/active-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Active Associates</a>
+              <a href="./associates/inactive-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inactive Associates</a>
+              <a href="./associates/diamond-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Diamond Associates</a>
+              <a href="./associates/tree-view.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Tree View</a>
+
             </div>
           </div>
 
+  <div class="sidebar-dropdown">
+            <a href="./upgrade-table.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Upgrade Table</span>
+              </div>
+            </a>
+          </div>
+
+  <div class="sidebar-dropdown">
+            <a href="./generate-withdrawal-link.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generate Withdrawal Link</span>
+              </div>
+            </a>
+          </div>
+
+          
           <!-- Manage Ads -->
           <div class="sidebar-dropdown">
             <button onclick="toggleDropdown('dash-ads')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
               <div class="flex items-center space-x-3">
                 <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">KYC</span>
+                <span class="sidebar-text">Withdrawal Requests</span>
               </div>
               <i data-lucide="chevron-down" id="icon-dash-ads" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
             </button>
             <div id="dash-ads" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
-              <a href="./kyc/pending-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending request</a>
-                           <a href="./kyc/accepted-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted request</a>
-              <a href="./kyc/rejected-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected request</a>
+              <a href="./withdrawal-request/pending-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Withdrawal Links</a>
+                           <a href="./withdrawal-request/accepted-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Withdrawal Links</a>
+              <a href="./withdrawal-request/unassigned-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Unassigned Withdrawal Links</a>
 
             </div>
           </div>
 
-       
-
- <div class="sidebar-dropdown">
-            <button onclick="window.location.href='./activation-report.html'"
- class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
-              <div class="flex items-center space-x-3">
-                <i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Activation Report</span>
-              </div>
-            
-          </div>
-
-
- <div class="sidebar-dropdown">
-            <button onclick="window.location.href='./closing-return.html'"
- class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
-              <div class="flex items-center space-x-3">
-                <i data-lucide="key" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Closing Return</span>
-              </div>
-            
-          </div>
 
            <div class="sidebar-dropdown">
             <button onclick="toggleDropdown('dash-admin-transaction')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
               <div class="flex items-center space-x-3">
                 <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Capital Profit Return</span>
+                <span class="sidebar-text">E-Pin</span>
               </div>
               <i data-lucide="chevron-down" id="icon-dash-admin-transaction" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
             </button>
             <div id="dash-admin-transaction" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
-              <a href="./capital-profit-return/profit-return.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Profit Return</a>
-              <a href="./capital-profit-return/profit-return-report.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Profit Return Report</a>
+              <a href="./e-pin/generate-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Generate E-Pin</a>
+              <a href="./e-pin/manage-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Manage E-Pin</a>
+                            <a href="./e-pin/request-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Requested E-Pin</a>
+              <a href="./e-pin/transferred-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Transferred E-Pin</a>
+        <a href="./e-pin/used-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Used E-Pin</a>
+                      <a href="./e-pin/unused-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Unused E-Pin</a>
+
+
             </div>
           </div>
 
 
-          <div class="sidebar-dropdown">
-            <button onclick="window.location.href='./rank-royalty-distribution.html'"
- class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
-              <div class="flex items-center space-x-3">
-                <i data-lucide="key" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Rank & Royalty Distribution</span>
-              </div>
-            
-          </div>
+
 
           <!-- Withdrawal Request -->
           <div class="sidebar-dropdown">
             <button onclick="toggleDropdown('dash-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
               <div class="flex items-center space-x-3">
                 <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Rank & Royalty</span>
+                <span class="sidebar-text">Fund Transfer</span>
               </div>
               <i data-lucide="chevron-down" id="icon-dash-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
             </button>
             <div id="dash-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
-              <a href="./rank-royalty/achived-list.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Achieved List</a>
-              <a href="./rank-royalty/pending-list.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending List</a>
-              <a href="./rank-royalty/tour-list.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Tour List</a>
-                            <a href="./rank-royalty/cash-list.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Cash List</a>
+              <a href="./fund-transfer/fund-transfer.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transfer</a>
+              <a href="./fund-transfer/transfer-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Transfer History</a>
+            
 
             </div>
           </div>
 
- <div class="sidebar-dropdown">
-            <button onclick="window.location.href='./generated-payout.html'"
- class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+  <div class="sidebar-dropdown">
+            <a href="./wallet-deduction.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
               <div class="flex items-center space-x-3">
-                <i data-lucide="key" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Generated Payout</span>
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Wallet Deduction</span>
               </div>
-            
+            </a>
           </div>
 
 
-           <div class="sidebar-dropdown">
-            <button onclick="window.location.href='./lapps-wallet-income.html'"
- class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
-              <div class="flex items-center space-x-3">
-                <i data-lucide="key" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Lapps Wallet Income</span>
-              </div>
-            
-          </div>
 
-          <!-- Bonus withdrawal Request -->
           <div class="sidebar-dropdown">
             <button onclick="toggleDropdown('dash-bonus-request')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
               <div class="flex items-center space-x-3">
                 <i data-lucide="send" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Bonus Withdrawal Request</span>
+                <span class="sidebar-text"></span>Generated Payout</span>
               </div>
               <i data-lucide="chevron-down" id="icon-dash-bonus-request" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
             </button>
             <div id="dash-bonus-request" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
-              <a href="./bonus-withdrawal-request/pending-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Request</a>
-              <a href="./bonus-withdrawal-request/accepted-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Request</a>
-              <a href="./bonus-withdrawal-request/rejected-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Request</a>
+              <a href="./generated-payouts/payout-table.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Payout Table</a>
             </div>
           </div>
 
@@ -247,132 +230,41 @@
             <button onclick="toggleDropdown('dash-capital-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
               <div class="flex items-center space-x-3">
                 <i data-lucide="banknote" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Capital Withdrawal Request</span>
+                <span class="sidebar-text">Notice</span>
               </div>
               <i data-lucide="chevron-down" id="icon-dash-capital-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
             </button>
             <div id="dash-capital-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
-              <a href="./capital-withdrawal-request/pending-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Request</a>
-              <a href="./capital-withdrawal-request/accepted-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Request</a>
-              <a href="./capital-withdrawal-request/rejected-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Request</a>
+              <a href="./notice/dashboard-notice.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Dashboard Notice</a>
             </div>
           </div>
 
-          <!-- Activation request -->
+
+
+
+        
           <div class="sidebar-dropdown">
-            <button onclick="toggleDropdown('dash-activation')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
-              <div class="flex items-center space-x-3">
-                <i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Activation Request</span>
-              </div>
-              <i data-lucide="chevron-down" id="icon-dash-activation" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
-            </button>
-            <div id="dash-activation" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
-              <a href="./activation-request/pending-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Request</a>
-              <a href="./activation-request/accepted-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Request</a>
-              <a href="./activation-request/rejected-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Request</a>
-            </div>
-          </div>
-
-           <div class="sidebar-dropdown">
-            <button onclick="toggleDropdown('dash-qr-code-banner')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
-              <div class="flex items-center space-x-3">
-                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Admin Transaction</span>
-              </div>
-              <i data-lucide="chevron-down" id="icon-dash-qr-code-banner" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
-            </button>
-            <div id="dash-qr-code-banner" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
-              <a href="./admin-transaction/fund-transaction.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transaction</a>
-              <a href="./admin-transaction/fund-transaction-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transaction History</a>
-              <a href="./admin-transaction/fund-deduction-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Deduction History</a>
-
-            </div>
-          </div>
-
-
-            <!-- QR Code Or Banner -->
-          <div class="sidebar-dropdown">
-            <button onclick="toggleDropdown('dash-capital-profit')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
-              <div class="flex items-center space-x-3">
-                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">QR Code Or Banner</span>
-              </div>
-              <i data-lucide="chevron-down" id="icon-dash-capital-profit" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
-            </button>
-            <div id="dash-capital-profit" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
-              <a href="./qr-code-banner/add-qr-code.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add QR Code Or Banner</a>
-            </div>
-          </div>
-
-          <!-- Notification -->
-          <div class="sidebar-dropdown">
-            <a href="./notification.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+            <a href="./support.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
               <div class="flex items-center space-x-3">
                 <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Notification</span>
+                <span class="sidebar-text">Support</span>
               </div>
             </a>
           </div>
 
-          <!-- Admin Settings -->
+
+
+              <!-- change password -->
           <div class="sidebar-dropdown">
-            <button onclick="toggleDropdown('dash-admin-setting')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+            <a href="./change-password.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
               <div class="flex items-center space-x-3">
-                <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Admin Settings</span>
+                <i data-lucide="lock" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Change Password</span>
               </div>
-              <i data-lucide="chevron-down" id="icon-dash-admin-setting" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
-            </button>
-            <div id="dash-admin-setting" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
-              <a href="./admin-setting/withdrawal-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Withdrawal Settings</a>
-              <a href="./admin-setting/level-income-distribution.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Level Income Distribution Settings</a>
-              <a href="./admin-setting/business-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Business Reward Settings</a>
-              <a href="./admin-setting/rank-royalty-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rank And Royalty Settings</a>
-              <a href="./admin-setting/add-imp-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Important Links</a>
-              <a href="./admin-setting/imp-link-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Important Links Setting</a>
-              <a href="./admin-setting/add-id-proof.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add ID Proof</a>
-              <a href="./admin-setting/id-proof-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">ID Proof Setting</a>
-              <a href="./admin-setting/add-broker-name.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Broker Name</a>
-              <a href="./admin-setting/broker-name-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Broker Name Setting</a>
-              <a href="./admin-setting/add-trending-type.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Trading Type</a>
-              <a href="./admin-setting/trending-type-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Trading Type Setting</a>
-              <a href="./admin-setting/add-service-type.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Service Type</a>
-              <a href="./admin-setting/service-type-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Service Type Setting</a>
-              <a href="./admin-setting/add-account-type.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Add Account Type</a>
-              <a href="./admin-setting/account-type-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Account Type Setting</a>
-              <a href="./admin-setting/currency-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Currency Setting</a>
-              <a href="./admin-setting/today-todate-setting.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Today & To Date Return's Setting</a>
-
-            </div>
+            </a>
           </div>
 
-          <!-- Support -->
-          <div class="sidebar-dropdown">
-            <button onclick="toggleDropdown('dash-support')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
-              <div class="flex items-center space-x-3">
-                <i data-lucide="headphones" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Support</span>
-              </div>
-              <i data-lucide="chevron-down" id="icon-dash-support" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
-            </button>
-            <div id="dash-support" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
-              <a href="./support/inbox.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inbox</a>
-              <a href="./support/outbox.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Outbox</a>
-             
-            </div>
-          </div>
-
-           <div class="sidebar-dropdown">
-            <button onclick="window.location.href='../password.html'"
- class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
-              <div class="flex items-center space-x-3">
-                <i data-lucide="key" class="w-4 h-4 shrink-0"></i>
-                <span class="sidebar-text">Password</span>
-              </div>
-            
-          </div>
-
+   
           <!-- Logout -->
           <div class="sidebar-dropdown">
             <button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">

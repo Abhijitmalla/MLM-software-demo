@@ -1,11 +1,483 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wallet Deduction · Auto Repurchase Demo</title>
+
+  <!-- Tailwind + fonts + icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#0e4a3d',
+              light: '#b6f059',
+              bg: '#f4f6f8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    #sidebar nav .sidebar-dropdown>button { padding-top: .7rem; padding-bottom: .7rem; font-size: 1rem; }
+    #sidebar nav .sidebar-dropdown>button>div>i,
+    #sidebar nav .sidebar-dropdown>button>i { width: 1.4rem; height: 1.4rem; }
+    #sidebar nav .sidebar-dropdown>div { font-size: .875rem; }
+
+    /* ---- glass card ---- */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(226, 232, 240, 0.5);
+    }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      border-color: rgba(51, 65, 85, 0.5);
+    }
+
+    /* ---- card header strip (brand) ---- */
+    .card-header-strip {
+      background: #0e4a3d;
+      color: #fff;
+      padding: 16px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 12px 12px 0 0;
+    }
+    .dark .card-header-strip {
+      background: #b6f059;
+      color: #0e4a3d;
+    }
+
+    /* ---- form input ---- */
+    .form-input {
+      width: 100%;
+      padding: 11px 16px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #334155;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .form-input::placeholder { color: #94a3b8; }
+    .form-input:focus {
+      border-color: #0e4a3d;
+      box-shadow: 0 0 0 3px rgba(14, 74, 61, 0.08);
+    }
+    .dark .form-input {
+      background: #1e293b;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    .dark .form-input::placeholder { color: #64748b; }
+    .dark .form-input:focus {
+      border-color: #b6f059;
+      box-shadow: 0 0 0 3px rgba(182, 240, 89, 0.12);
+    }
+
+    /* ---- select styling ---- */
+    .form-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 44px;
+    }
+    .dark .form-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    }
+
+    /* ============================================================
+       TABLE — SAME BRAND COLOURS AS SIDEBAR / NAVBAR
+       ============================================================ */
+    .epin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      color: #1e293b;
+    }
+    .dark .epin-table {
+      color: #e2e8f0;
+    }
+
+    /* THEAD — brand dark green (same as active sidebar link) */
+    .epin-table thead tr {
+      background: #0e4a3d !important;
+      color: #ffffff !important;
+    }
+    .dark .epin-table thead tr {
+      background: #b6f059 !important;
+      color: #0e4a3d !important;
+    }
+
+    .epin-table th {
+      padding: 12px 10px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .epin-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .dark .epin-table td {
+      border-bottom-color: #334155;
+    }
+
+    /* Row hover — soft brand tint */
+    .epin-table tbody tr:hover {
+      background: #e8f5e9;
+    }
+    .dark .epin-table tbody tr:hover {
+      background: #1e293b;
+    }
+
+    .epin-table .checkbox-cell {
+      width: 36px;
+      text-align: center;
+    }
+
+    /* Sort icons */
+    .epin-table .sort-icon {
+      display: inline-block;
+      margin-left: 4px;
+      opacity: 0.65;
+      font-size: 12px;
+    }
+    .epin-table th .sort-icon {
+      color: rgba(255, 255, 255, 0.75);
+    }
+    .dark .epin-table th .sort-icon {
+      color: rgba(14, 74, 61, 0.6);
+    }
+
+    /* Checkbox accent */
+    .epin-table input[type="checkbox"] {
+      accent-color: #0e4a3d;
+    }
+    .dark .epin-table input[type="checkbox"] {
+      accent-color: #b6f059;
+    }
+
+    /* Pagination buttons (brand) */
+    .pagination-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+      background: transparent;
+      color: #64748b;
+      border: 1px solid transparent;
+    }
+    .pagination-btn:hover {
+      background: rgba(14, 74, 61, 0.08);
+      color: #0e4a3d;
+    }
+    .dark .pagination-btn:hover {
+      background: rgba(182, 240, 89, 0.12);
+      color: #b6f059;
+    }
+    .pagination-btn.active {
+      background: #0e4a3d !important;
+      color: #fff !important;
+    }
+    .dark .pagination-btn.active {
+      background: #b6f059 !important;
+      color: #0e4a3d !important;
+    }
+    .pagination-btn.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* Export button (brand dark green) */
+    .btn-export {
+      background: #0e4a3d !important;
+      color: #fff !important;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .btn-export:hover {
+      background: #0b3a30 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14, 74, 61, 0.25);
+    }
+    .dark .btn-export {
+      background: #b6f059 !important;
+      color: #0e4a3d !important;
+    }
+    .dark .btn-export:hover {
+      background: #a3d94c !important;
+      box-shadow: 0 4px 12px rgba(182, 240, 89, 0.25);
+    }
+
+    /* Search Table button (brand lime accent) */
+    .btn-search-table {
+      background: #b6f059 !important;
+      color: #0e4a3d !important;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .btn-search-table:hover {
+      background: #a3d94c !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(182, 240, 89, 0.25);
+    }
+    .dark .btn-search-table {
+      background: rgba(182, 240, 89, 0.15) !important;
+      color: #b6f059 !important;
+      border: 1px solid rgba(182, 240, 89, 0.3);
+    }
+    .dark .btn-search-table:hover {
+      background: rgba(182, 240, 89, 0.25) !important;
+    }
+
+    /* Search input (brand focus) */
+    .search-input {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 16px 10px 42px;
+      font-size: 14px;
+      color: #334155;
+      transition: all 0.2s;
+      outline: none;
+      width: 100%;
+    }
+    .search-input:focus {
+      border-color: #0e4a3d;
+      box-shadow: 0 0 0 3px rgba(14, 74, 61, 0.08);
+    }
+    .dark .search-input {
+      background: #1e293b;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    .dark .search-input:focus {
+      border-color: #b6f059;
+      box-shadow: 0 0 0 3px rgba(182, 240, 89, 0.12);
+    }
+
+    /* Search icon button (brand) */
+    .btn-search-icon {
+      background: #0e4a3d;
+      color: #fff;
+      padding: 11px 18px;
+      border-radius: 10px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-search-icon:hover {
+      background: #0b3a30;
+      box-shadow: 0 4px 12px rgba(14, 74, 61, 0.3);
+      transform: translateY(-1px);
+    }
+    .dark .btn-search-icon {
+      background: #b6f059;
+      color: #0e4a3d;
+    }
+    .dark .btn-search-icon:hover {
+      background: #a3d94c;
+      box-shadow: 0 4px 12px rgba(182, 240, 89, 0.3);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+    .dark .empty-state { color: #64748b; }
+
+    /* Small brand dots */
+    .dot-brand-dark  { background: #0e4a3d; }
+    .dot-brand-light { background: #b6f059; }
+    .dot-brand-mid   { background: #7bbf4a; }
+  </style>
 </head>
-<body>
-    
+
+<body class="bg-[#f4f6f8] dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex transition-colors duration-200">
+
+  <!-- ========== SIDEBAR ========
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- header -->
+    <header class="h-16 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-b border-slate-200/60 dark:border-slate-700/60 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
+      <div class="flex items-center space-x-4">
+        <button id="sidebarToggle" onclick="toggleSidebar()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i data-lucide="sidebar" class="w-5 h-5"></i></button>
+        <div class="relative w-64 hidden sm:block"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-1.5 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light"></div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i></button>
+        <div class="flex items-center space-x-1 cursor-pointer"><span class="text-xl">🇬🇧</span></div>
+        <button class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg relative transition"><i data-lucide="bell" class="w-5 h-5"></i><span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">6</span></button>
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover cursor-pointer">
+      </div>
+    </header>
+
+    <!-- ============ MAIN – WALLET DEDUCTION ============ -->
+    <main class="p-6 overflow-y-auto">
+
+      <!-- Search card (centered, narrow) -->
+      <div class="max-w-2xl mx-auto mb-6">
+        <div class="glass-card rounded-xl shadow-sm overflow-hidden">
+          <div class="card-header-strip flex items-center gap-3">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span>Wallet Deduction</span>
+          </div>
+          <div class="p-6 sm:p-8">
+            <div class="flex gap-3">
+              <input
+                type="text"
+                placeholder="USER ID"
+                class="form-input flex-1 uppercase"
+              />
+              <button class="btn-search-icon" title="Search User">
+                <i data-lucide="search" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deduction History table card -->
+      <div class="glass-card rounded-xl shadow-sm overflow-hidden">
+        <div class="p-4 sm:p-6">
+
+          <!-- Title + action buttons row -->
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+            <h2 class="text-base font-bold text-slate-800 dark:text-white tracking-tight uppercase">Deduction History</h2>
+            <div class="flex items-center gap-3">
+              <button class="btn-search-table">Search Table</button>
+              <button class="btn-export">Export Table</button>
+              <div class="flex items-center gap-1.5 ml-2">
+                <span class="w-3.5 h-3.5 rounded-full dot-brand-dark inline-block"></span>
+                <span class="w-3.5 h-3.5 rounded-full dot-brand-light inline-block"></span>
+                <span class="w-3.5 h-3.5 rounded-full dot-brand-mid inline-block"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table (empty state, ready for data) -->
+          <div class="overflow-x-auto custom-scrollbar -mx-4 sm:mx-0">
+            <table class="epin-table min-w-[1000px]">
+              <thead>
+                <tr>
+                  <th>S.No <span class="sort-icon">↓↑</span></th>
+                  <th>Member ID <span class="sort-icon">↓↑</span></th>
+                  <th>Opening Balance <span class="sort-icon">↓↑</span></th>
+                  <th>Deduction <span class="sort-icon">↓↑</span></th>
+                  <th>Closing Balance <span class="sort-icon">↓↑</span></th>
+                  <th>Date <span class="sort-icon">↓↑</span></th>
+                  <th>From Wallet <span class="sort-icon">↓↑</span></th>
+                  <th>Remarks <span class="sort-icon">↓↑</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Empty state row -->
+                <tr>
+                  <td colspan="8" class="empty-state">
+                    <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-60"></i>
+                    <p>No deduction records found. Search by User ID to view history.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    lucide.createIcons();
+
+    function toggleDropdown(id) {
+      const targetMenu = document.getElementById(id);
+      const targetIcon = document.getElementById('icon-' + id);
+      document.querySelectorAll('.sidebar-dropdown > div').forEach(el => {
+        if (el.id !== id && !el.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          const otherIcon = document.getElementById('icon-' + el.id);
+          if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+        }
+      });
+      if (targetMenu.classList.contains('hidden')) {
+        targetMenu.classList.remove('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(180deg)';
+      } else {
+        targetMenu.classList.add('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    let isSidebarCollapsed = false;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const textElements = document.querySelectorAll('.sidebar-text');
+      isSidebarCollapsed = !isSidebarCollapsed;
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-20');
+        textElements.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-80');
+        textElements.forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      const themeIcon = document.getElementById('themeIcon');
+      if (isDark) themeIcon.setAttribute('data-lucide', 'sun');
+      else themeIcon.setAttribute('data-lucide', 'moon');
+      lucide.createIcons();
+    }
+  </script>
+
 </body>
 </html>

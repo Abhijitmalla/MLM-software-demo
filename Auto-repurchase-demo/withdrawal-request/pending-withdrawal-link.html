@@ -257,7 +257,7 @@
         <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Dashboards</p>
         <div class="space-y-1">
           <!-- Dashboard -->
-          <a href="../index.html" class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-brand-dark text-white font-medium text-base transition">
+          <a href="../index.html" class="flex items-center justify-between px-3 py-2.5 rounded-lg font-medium text-base transition">
             <div class="flex items-center space-x-3">
               <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-light shrink-0"></i>
               <span class="sidebar-text">Dashboard</span>
@@ -302,7 +302,7 @@
 
           <!-- Withdrawal Requests -->
           <div class="sidebar-dropdown">
-            <button onclick="toggleDropdown('dash-ads')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+            <button onclick="toggleDropdown('dash-ads')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 bg-brand-dark text-white text-sm font-medium transition">
               <div class="flex items-center space-x-3">
                 <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>
                 <span class="sidebar-text">Withdrawal Requests</span>
@@ -337,16 +337,29 @@
 
           <!-- Fund Transfer / Rank & Royalty -->
           <div class="sidebar-dropdown">
-            <button onclick="toggleDropdown('dash-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+            <button onclick="toggleDropdown('dash-fund-transfer')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
               <div class="flex items-center space-x-3">
                 <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
                 <span class="sidebar-text">Fund Transfer</span>
               </div>
-              <i data-lucide="chevron-down" id="icon-dash-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+              <i data-lucide="chevron-down" id="icon-dash-fund-transfer" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
             </button>
-            <div id="dash-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+            <div id="dash-fund-transfer" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
               <a href="../fund-transfer/fund-transfer.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transfer</a>
               <a href="../fund-transfer/transfer-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Transfer History</a>
+            </div>
+          </div>
+            <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-withdrawal-history')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Withdrawal History</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-withdrawal-history" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-withdrawal-history" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../withdrawal-history/pending-withdrawal.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Withdrawals</a>
+              <a href="../withdrawal-history/accepted-withdrawal.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Withdrawals</a>
             </div>
           </div>
 

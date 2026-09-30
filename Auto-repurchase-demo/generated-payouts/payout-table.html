@@ -1,11 +1,884 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generated Payout · Auto Repurchase Demo</title>
+
+  <!-- Tailwind + fonts + icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#0e4a3d',
+              light: '#b6f059',
+              bg: '#f4f6f8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    #sidebar nav .sidebar-dropdown>button { padding-top: .7rem; padding-bottom: .7rem; font-size: 1rem; }
+    #sidebar nav .sidebar-dropdown>button>div>i,
+    #sidebar nav .sidebar-dropdown>button>i { width: 1.4rem; height: 1.4rem; }
+    #sidebar nav .sidebar-dropdown>div { font-size: .875rem; }
+
+    /* ---- glass card ---- */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(226, 232, 240, 0.5);
+    }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      border-color: rgba(51, 65, 85, 0.5);
+    }
+
+    /* ---- form input ---- */
+    .form-input {
+      width: 100%;
+      padding: 11px 16px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #334155;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .form-input::placeholder { color: #94a3b8; }
+    .form-input:focus {
+      border-color: #0e4a3d;
+      box-shadow: 0 0 0 3px rgba(14, 74, 61, 0.08);
+    }
+    .dark .form-input {
+      background: #1e293b;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    .dark .form-input::placeholder { color: #64748b; }
+    .dark .form-input:focus {
+      border-color: #b6f059;
+      box-shadow: 0 0 0 3px rgba(182, 240, 89, 0.12);
+    }
+
+    /* ---- select styling ---- */
+    .form-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 44px;
+    }
+    .dark .form-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    }
+
+    /* ---- date input ---- */
+    .date-input-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .date-input-wrap .cal-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      pointer-events: none;
+      width: 18px;
+      height: 18px;
+    }
+    .date-range-input {
+      width: 100%;
+      padding: 11px 16px 11px 40px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #334155;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .date-range-input:focus {
+      border-color: #0e4a3d;
+      box-shadow: 0 0 0 3px rgba(14, 74, 61, 0.08);
+    }
+    .dark .date-range-input {
+      background: #1e293b;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    .dark .date-range-input:focus {
+      border-color: #b6f059;
+      box-shadow: 0 0 0 3px rgba(182, 240, 89, 0.12);
+    }
+
+    /* ============================================================
+       TABLE — SAME BRAND COLOURS AS SIDEBAR / NAVBAR
+       ============================================================ */
+    .epin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      color: #1e293b;
+    }
+    .dark .epin-table {
+      color: #e2e8f0;
+    }
+
+    /* THEAD — brand dark green (same as active sidebar link) */
+    .epin-table thead tr {
+      background: #0e4a3d !important;
+      color: #ffffff !important;
+    }
+    .dark .epin-table thead tr {
+      background: #b6f059 !important;
+      color: #0e4a3d !important;
+    }
+
+    .epin-table th {
+      padding: 12px 10px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .epin-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .dark .epin-table td {
+      border-bottom-color: #334155;
+    }
+
+    /* Row hover — soft brand tint */
+    .epin-table tbody tr:hover {
+      background: #e8f5e9;
+    }
+    .dark .epin-table tbody tr:hover {
+      background: #1e293b;
+    }
+
+    .epin-table .checkbox-cell {
+      width: 36px;
+      text-align: center;
+    }
+
+    /* Sort icons */
+    .epin-table .sort-icon {
+      display: inline-block;
+      margin-left: 4px;
+      opacity: 0.65;
+      font-size: 12px;
+    }
+    .epin-table th .sort-icon {
+      color: rgba(255, 255, 255, 0.75);
+    }
+    .dark .epin-table th .sort-icon {
+      color: rgba(14, 74, 61, 0.6);
+    }
+
+    /* Checkbox accent */
+    .epin-table input[type="checkbox"] {
+      accent-color: #0e4a3d;
+    }
+    .dark .epin-table input[type="checkbox"] {
+      accent-color: #b6f059;
+    }
+
+    /* Pagination buttons (brand) */
+    .pagination-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+      background: transparent;
+      color: #64748b;
+      border: 1px solid transparent;
+    }
+    .pagination-btn:hover {
+      background: rgba(14, 74, 61, 0.08);
+      color: #0e4a3d;
+    }
+    .dark .pagination-btn:hover {
+      background: rgba(182, 240, 89, 0.12);
+      color: #b6f059;
+    }
+    .pagination-btn.active {
+      background: #0e4a3d !important;
+      color: #fff !important;
+    }
+    .dark .pagination-btn.active {
+      background: #b6f059 !important;
+      color: #0e4a3d !important;
+    }
+    .pagination-btn.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* Export button (brand dark green) */
+    .btn-export {
+      background: #0e4a3d !important;
+      color: #fff !important;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .btn-export:hover {
+      background: #0b3a30 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14, 74, 61, 0.25);
+    }
+    .dark .btn-export {
+      background: #b6f059 !important;
+      color: #0e4a3d !important;
+    }
+    .dark .btn-export:hover {
+      background: #a3d94c !important;
+      box-shadow: 0 4px 12px rgba(182, 240, 89, 0.25);
+    }
+
+    /* Search Table button (brand lime accent) */
+    .btn-search-table {
+      background: #b6f059 !important;
+      color: #0e4a3d !important;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .btn-search-table:hover {
+      background: #a3d94c !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(182, 240, 89, 0.25);
+    }
+    .dark .btn-search-table {
+      background: rgba(182, 240, 89, 0.15) !important;
+      color: #b6f059 !important;
+      border: 1px solid rgba(182, 240, 89, 0.3);
+    }
+    .dark .btn-search-table:hover {
+      background: rgba(182, 240, 89, 0.25) !important;
+    }
+
+    /* Search input (brand focus) */
+    .search-input {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 16px 10px 42px;
+      font-size: 14px;
+      color: #334155;
+      transition: all 0.2s;
+      outline: none;
+      width: 100%;
+    }
+    .search-input:focus {
+      border-color: #0e4a3d;
+      box-shadow: 0 0 0 3px rgba(14, 74, 61, 0.08);
+    }
+    .dark .search-input {
+      background: #1e293b;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    .dark .search-input:focus {
+      border-color: #b6f059;
+      box-shadow: 0 0 0 3px rgba(182, 240, 89, 0.12);
+    }
+
+    /* Filter search button (brand) */
+    .btn-filter-search {
+      background: #0e4a3d;
+      color: #fff;
+      padding: 11px 18px;
+      border-radius: 10px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-filter-search:hover {
+      background: #0b3a30;
+      box-shadow: 0 4px 12px rgba(14, 74, 61, 0.3);
+      transform: translateY(-1px);
+    }
+    .dark .btn-filter-search {
+      background: #b6f059;
+      color: #0e4a3d;
+    }
+    .dark .btn-filter-search:hover {
+      background: #a3d94c;
+      box-shadow: 0 4px 12px rgba(182, 240, 89, 0.3);
+    }
+
+    /* Income type badge (soft brand) */
+    .income-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(14, 74, 61, 0.08);
+      color: #0e4a3d;
+    }
+    .dark .income-badge {
+      background: rgba(182, 240, 89, 0.15);
+      color: #b6f059;
+    }
+
+    /* Small brand dots */
+    .dot-brand-dark  { background: #0e4a3d; }
+    .dot-brand-light { background: #b6f059; }
+    .dot-brand-mid   { background: #7bbf4a; }
+  </style>
 </head>
-<body>
-    
+
+<body class="bg-[#f4f6f8] dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex transition-colors duration-200">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside id="sidebar" class="w-80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-slate-200/60 dark:border-slate-700/60 flex flex-col shrink-0 h-screen sticky top-0 custom-scrollbar overflow-y-auto transition-all duration-300 z-20">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3 sidebar-text">
+        <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
+          <i data-lucide="circle-dot" class="w-5 h-5"></i>
+        </div>
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Auto Repurchase Demo</span>
+      </div>
+    </div>
+
+    <nav class="px-4 pb-6 space-y-6">
+      <div>
+        <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Dashboards</p>
+        <div class="space-y-1">
+          <!-- Dashboard -->
+          <a href="../index.html" class="flex items-center justify-between px-3 py-2.5 rounded-lg font-medium text-base transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-light shrink-0"></i>
+              <span class="sidebar-text">Dashboard</span>
+            </div>
+          </a>
+
+          <!-- Associates -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-associate')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Associates</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-associate" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-associate" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../associates/all-associates.html" class="block py-1.5 text-brand-dark dark:text-brand-light font-semibold">All Associates</a>
+              <a href="../associates/active-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Active Associates</a>
+              <a href="../associates/inactive-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Inactive Associates</a>
+              <a href="../associates/diamond-associates.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Diamond Associates</a>
+              <a href="../associates/tree-view.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Tree View</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../upgrade-table.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Upgrade Table</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../generate-withdrawal-link.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generate Withdrawal Link</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Withdrawal Requests -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-ads')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300  text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Withdrawal Requests</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-ads" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-ads" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../withdrawal-request/pending-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Withdrawal Links</a>
+              <a href="../withdrawal-request/accepted-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Withdrawal Links</a>
+              <a href="../withdrawal-request/unassigned-withdrawal-link.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Unassigned Withdrawal Links</a>
+            </div>
+          </div>
+
+          <!-- E-Pin -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-admin-transaction')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">E-Pin</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-admin-transaction" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-admin-transaction" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../e-pin/generate-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Generate E-Pin</a>
+              <a href="../e-pin/manage-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Manage E-Pin</a>
+              <a href="../e-pin/request-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Requested E-Pin</a>
+              <a href="../e-pin/transferred-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Transferred E-Pin</a>
+              <a href="../e-pin/used-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Used E-Pin</a>
+              <a href="../e-pin/unused-e-pin.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Unused E-Pin</a>
+            </div>
+          </div>
+
+          <!-- Fund Transfer / Rank & Royalty -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-fund-transfer')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Fund Transfer</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-fund-transfer" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-fund-transfer" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../fund-transfer/fund-transfer.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Fund Transfer</a>
+              <a href="../fund-transfer/transfer-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Transfer History</a>
+            </div>
+          </div>
+            <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-withdrawal-history')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Withdrawal History</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-withdrawal-history" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-withdrawal-history" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../withdrawal-history/pending-withdrawal.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Withdrawals</a>
+              <a href="../withdrawal-history/accepted-withdrawal.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Withdrawals</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../wallet-deduction.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Wallet Deduction</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Generated Payout -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-bonus-request')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 bg-brand-dark text-white text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="send" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generated Payout</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-bonus-request" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-bonus-request" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../generated-payouts/payout-table.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Payout Table</a>
+            </div>
+          </div>
+
+          <!-- Notice -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-capital-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="banknote" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Notice</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-capital-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-capital-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../notice/dashboard-notice.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Dashboard Notice</a>
+            </div>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../support.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="bell" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Support</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="sidebar-dropdown">
+            <a href="../change-password.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="lock" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Change Password</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Logout -->
+          <div class="sidebar-dropdown">
+            <button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="log-out" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Logout</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- header -->
+    <header class="h-16 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-b border-slate-200/60 dark:border-slate-700/60 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
+      <div class="flex items-center space-x-4">
+        <button id="sidebarToggle" onclick="toggleSidebar()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i data-lucide="sidebar" class="w-5 h-5"></i></button>
+        <div class="relative w-64 hidden sm:block"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-1.5 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light"></div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i></button>
+        <div class="flex items-center space-x-1 cursor-pointer"><span class="text-xl">🇬🇧</span></div>
+        <button class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg relative transition"><i data-lucide="bell" class="w-5 h-5"></i><span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">6</span></button>
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover cursor-pointer">
+      </div>
+    </header>
+
+    <!-- ============ MAIN – GENERATED PAYOUT ============ -->
+    <main class="p-6 overflow-y-auto">
+
+      <!-- Title + action buttons row -->
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">GENERATED PAYOUT</h1>
+        <div class="flex items-center gap-3">
+          <button class="btn-search-table">Search Table</button>
+          <button class="btn-export">Export Table</button>
+          <div class="flex items-center gap-1.5 ml-2">
+            <span class="w-3.5 h-3.5 rounded-full dot-brand-dark inline-block"></span>
+            <span class="w-3.5 h-3.5 rounded-full dot-brand-light inline-block"></span>
+            <span class="w-3.5 h-3.5 rounded-full dot-brand-mid inline-block"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter card -->
+      <div class="glass-card rounded-xl shadow-sm overflow-hidden mb-6">
+        <div class="p-4 sm:p-5">
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- ALL Incomes -->
+            <select class="form-input form-select w-full sm:w-48 text-sm">
+              <option>ALL Incomes</option>
+              <option>Level Income</option>
+              <option>Referral Income</option>
+              <option>Bonus Income</option>
+              <option>Royalty Income</option>
+            </select>
+
+            <!-- USER ID -->
+            <input type="text" placeholder="USER ID" class="form-input w-full sm:w-56 text-sm uppercase" />
+
+            <!-- Date Range -->
+            <div class="date-input-wrap w-full sm:w-64">
+              <i data-lucide="calendar" class="cal-icon"></i>
+              <input type="text" value="2026-09-30 - 2026-09-30" class="date-range-input text-sm" />
+            </div>
+
+            <!-- Search button -->
+            <button class="btn-filter-search" title="Apply Filters">
+              <i data-lucide="search" class="w-5 h-5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table card -->
+      <div class="glass-card rounded-xl shadow-sm overflow-hidden">
+        <div class="p-4 sm:p-6">
+
+          <!-- Search + show entries row -->
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div class="relative w-full sm:w-72">
+              <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input type="text" placeholder="Search" class="search-input" />
+            </div>
+            <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+              <span>Show</span>
+              <select class="form-input form-select w-20 py-1.5 px-3 text-sm rounded-lg">
+                <option>10</option>
+                <option>25</option>
+                <option>50</option>
+                <option>100</option>
+              </select>
+              <span>entries</span>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="overflow-x-auto custom-scrollbar -mx-4 sm:mx-0">
+            <table class="epin-table min-w-[1200px]">
+              <thead>
+                <tr>
+                  <th class="checkbox-cell"><input type="checkbox" class="w-4 h-4 rounded border-white/40" /></th>
+                  <th># <span class="sort-icon">↓↑</span></th>
+                  <th>USER ID <span class="sort-icon">↓↑</span></th>
+                  <th>Name <span class="sort-icon">↓↑</span></th>
+                  <th>Mobile <span class="sort-icon">↓↑</span></th>
+                  <th>Date <span class="sort-icon">↓↑</span></th>
+                  <th>Income Type <span class="sort-icon">↓↑</span></th>
+                  <th>On Amount <span class="sort-icon">↓↑</span></th>
+                  <th>Amount <span class="sort-icon">↓↑</span></th>
+                  <th>Level <span class="sort-icon">↓↑</span></th>
+                  <th>Remarks <span class="sort-icon">↓↑</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Row 1 -->
+                <tr>
+                  <td class="checkbox-cell"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600" /></td>
+                  <td>1</td>
+                  <td class="font-medium">WIN5001</td>
+                  <td>demohelpin</td>
+                  <td>1234567890</td>
+                  <td class="whitespace-nowrap">2022-09-10 17:47:26</td>
+                  <td><span class="income-badge">Level Income</span></td>
+                  <td>Rs. 500.00</td>
+                  <td class="font-medium">Rs. 50.00</td>
+                  <td>1</td>
+                  <td class="text-slate-400 dark:text-slate-500">—</td>
+                </tr>
+                <!-- Row 2 -->
+                <tr>
+                  <td class="checkbox-cell"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600" /></td>
+                  <td>2</td>
+                  <td class="font-medium">WIN355335</td>
+                  <td>demohelpin</td>
+                  <td>1234567890</td>
+                  <td class="whitespace-nowrap">2022-09-10 18:41:37</td>
+                  <td><span class="income-badge">Referral Income</span></td>
+                  <td>Rs. 1,000.00</td>
+                  <td class="font-medium">Rs. 100.00</td>
+                  <td>1</td>
+                  <td class="text-slate-400 dark:text-slate-500">—</td>
+                </tr>
+                <!-- Row 3 -->
+                <tr>
+                  <td class="checkbox-cell"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600" /></td>
+                  <td>3</td>
+                  <td class="font-medium">WIN291414</td>
+                  <td>demohelpin</td>
+                  <td>1234567890</td>
+                  <td class="whitespace-nowrap">2022-09-10 18:42:25</td>
+                  <td><span class="income-badge">Level Income</span></td>
+                  <td>Rs. 500.00</td>
+                  <td class="font-medium">Rs. 25.00</td>
+                  <td>2</td>
+                  <td class="text-slate-400 dark:text-slate-500">—</td>
+                </tr>
+                <!-- Row 4 -->
+                <tr>
+                  <td class="checkbox-cell"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600" /></td>
+                  <td>4</td>
+                  <td class="font-medium">WIN160927</td>
+                  <td>demohelpin</td>
+                  <td>1234567890</td>
+                  <td class="whitespace-nowrap">2022-09-10 18:42:51</td>
+                  <td><span class="income-badge">Bonus Income</span></td>
+                  <td>Rs. 2,000.00</td>
+                  <td class="font-medium">Rs. 200.00</td>
+                  <td>1</td>
+                  <td>Monthly Bonus</td>
+                </tr>
+                <!-- Row 5 -->
+                <tr>
+                  <td class="checkbox-cell"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600" /></td>
+                  <td>5</td>
+                  <td class="font-medium">WIN595131</td>
+                  <td>demohelpin</td>
+                  <td>1234567890</td>
+                  <td class="whitespace-nowrap">2022-09-10 18:43:08</td>
+                  <td><span class="income-badge">Level Income</span></td>
+                  <td>Rs. 500.00</td>
+                  <td class="font-medium">Rs. 15.00</td>
+                  <td>3</td>
+                  <td class="text-slate-400 dark:text-slate-500">—</td>
+                </tr>
+                <!-- Row 6 -->
+                <tr>
+                  <td class="checkbox-cell"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600" /></td>
+                  <td>6</td>
+                  <td class="font-medium">WIN860472</td>
+                  <td>demohelpin</td>
+                  <td>1234567890</td>
+                  <td class="whitespace-nowrap">2022-09-10 18:43:57</td>
+                  <td><span class="income-badge">Royalty Income</span></td>
+                  <td>Rs. 5,000.00</td>
+                  <td class="font-medium">Rs. 500.00</td>
+                  <td>1</td>
+                  <td>Diamond Rank</td>
+                </tr>
+                <!-- Row 7 -->
+                <tr>
+                  <td class="checkbox-cell"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600" /></td>
+                  <td>7</td>
+                  <td class="font-medium">WIN327902</td>
+                  <td>demohelpin</td>
+                  <td>1234567890</td>
+                  <td class="whitespace-nowrap">2022-09-10 18:44:15</td>
+                  <td><span class="income-badge">Level Income</span></td>
+                  <td>Rs. 1,500.00</td>
+                  <td class="font-medium">Rs. 75.00</td>
+                  <td>2</td>
+                  <td class="text-slate-400 dark:text-slate-500">—</td>
+                </tr>
+                <!-- Row 8 -->
+                <tr>
+                  <td class="checkbox-cell"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600" /></td>
+                  <td>8</td>
+                  <td class="font-medium">WIN471289</td>
+                  <td>demohelpin</td>
+                  <td>1234567890</td>
+                  <td class="whitespace-nowrap">2022-09-10 18:44:40</td>
+                  <td><span class="income-badge">Referral Income</span></td>
+                  <td>Rs. 800.00</td>
+                  <td class="font-medium">Rs. 80.00</td>
+                  <td>1</td>
+                  <td class="text-slate-400 dark:text-slate-500">—</td>
+                </tr>
+                <!-- Row 9 -->
+                <tr>
+                  <td class="checkbox-cell"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600" /></td>
+                  <td>9</td>
+                  <td class="font-medium">WIN805845</td>
+                  <td>demohelpin</td>
+                  <td>1234567890</td>
+                  <td class="whitespace-nowrap">2022-09-10 18:44:58</td>
+                  <td><span class="income-badge">Bonus Income</span></td>
+                  <td>Rs. 3,000.00</td>
+                  <td class="font-medium">Rs. 300.00</td>
+                  <td>1</td>
+                  <td>Festival Bonus</td>
+                </tr>
+                <!-- Row 10 -->
+                <tr>
+                  <td class="checkbox-cell"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600" /></td>
+                  <td>10</td>
+                  <td class="font-medium">WIN970261</td>
+                  <td>demohelpin</td>
+                  <td>1234567890</td>
+                  <td class="whitespace-nowrap">2022-09-10 18:45:23</td>
+                  <td><span class="income-badge">Level Income</span></td>
+                  <td>Rs. 500.00</td>
+                  <td class="font-medium">Rs. 10.00</td>
+                  <td>4</td>
+                  <td class="text-slate-400 dark:text-slate-500">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination + entries info -->
+          <div class="flex flex-wrap items-center justify-between gap-4 mt-6">
+            <p class="text-sm text-slate-500 dark:text-slate-400">Showing 1 to 10 of 10 entries</p>
+            <div class="flex items-center gap-1">
+              <button class="pagination-btn disabled" disabled>&lt;</button>
+              <button class="pagination-btn active">1</button>
+              <button class="pagination-btn disabled" disabled>&gt;</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    lucide.createIcons();
+
+    function toggleDropdown(id) {
+      const targetMenu = document.getElementById(id);
+      const targetIcon = document.getElementById('icon-' + id);
+      document.querySelectorAll('.sidebar-dropdown > div').forEach(el => {
+        if (el.id !== id && !el.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          const otherIcon = document.getElementById('icon-' + el.id);
+          if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+        }
+      });
+      if (targetMenu.classList.contains('hidden')) {
+        targetMenu.classList.remove('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(180deg)';
+      } else {
+        targetMenu.classList.add('hidden');
+        if (targetIcon) targetIcon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    let isSidebarCollapsed = false;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const textElements = document.querySelectorAll('.sidebar-text');
+      isSidebarCollapsed = !isSidebarCollapsed;
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-20');
+        textElements.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-80');
+        textElements.forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      const themeIcon = document.getElementById('themeIcon');
+      if (isDark) themeIcon.setAttribute('data-lucide', 'sun');
+      else themeIcon.setAttribute('data-lucide', 'moon');
+      lucide.createIcons();
+    }
+
+    // Open Generated Payout dropdown on load + highlight Payout Table
+    document.addEventListener('DOMContentLoaded', function() {
+      const gpMenu = document.getElementById('dash-bonus-request');
+      const gpIcon = document.getElementById('icon-dash-bonus-request');
+      if (gpMenu && gpMenu.classList.contains('hidden')) {
+        gpMenu.classList.remove('hidden');
+        if (gpIcon) gpIcon.style.transform = 'rotate(180deg)';
+      }
+    });
+  </script>
+
 </body>
 </html>

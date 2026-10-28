@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wallet Lock and Unlock - Auto Repurchase Demo</title>
+
+  <!-- Tailwind + fonts + icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#0e4a3d', /* The dark green from your sidebar */
+              light: '#b6f059', /* The light green */
+              bg: '#f4f6f8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* --- Sidebar & Base Scrollbar --- */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    #sidebar nav .sidebar-dropdown>button { padding-top: .7rem; padding-bottom: .7rem; font-size: 1rem; }
+    #sidebar nav .sidebar-dropdown>button>div>i,
+    #sidebar nav .sidebar-dropdown>button>i { width: 1.4rem; height: 1.4rem; }
+    #sidebar nav .sidebar-dropdown>div { font-size: .875rem; }
+
+    /* --- Form & Card Styling --- */
+    .custom-card {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+    }
+    .dark .custom-card {
+      background: #1e293b;
+      border-color: #334155;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header {
+      background-color: #0e4a3d; /* Brand Dark */
+      color: #ffffff;
+      padding: 12px 20px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #4b5563;
+      margin-bottom: 6px;
+    }
+    .dark .form-label {
+      color: #94a3b8;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #374151;
+      background-color: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      transition: all 0.2s;
+      appearance: none; /* For custom select arrow */
+    }
+    .dark .form-control {
+      background-color: #0f172a;
+      border-color: #475569;
+      color: #e2e8f0;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #0e4a3d;
+      box-shadow: 0 0 0 3px rgba(14, 74, 61, 0.1);
+    }
+    .dark .form-control:focus {
+      border-color: #b6f059;
+      box-shadow: 0 0 0 3px rgba(182, 240, 89, 0.15);
+    }
+
+    /* Custom Select Wrapper for Arrow */
+    .select-wrapper {
+      position: relative;
+    }
+    .select-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid #6b7280;
+      pointer-events: none;
+    }
+    .dark .select-wrapper::after {
+      border-top-color: #94a3b8;
+    }
+
+    /* Buttons */
+    .btn-save {
+      background-color: #0e4a3d; /* Brand Dark */
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 24px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-save:hover {
+      background-color: #b6f059; /* Brand Light */
+      color: #0e4a3d; /* Brand Dark */
+    }
+
+    .btn-reset {
+      background-color: #9f1239; /* Dark Maroon/Red */
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 24px;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-reset:hover {
+      background-color: #881337;
+    }
+
+    /* Simplified Table Styling */
+    .config-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    .config-table th {
+      background-color: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-bottom: 2px solid #e2e8f0;
+      border-right: 1px solid #e2e8f0;
+    }
+    .dark .config-table th {
+      background-color: #0f172a;
+      color: #cbd5e1;
+      border-color: #334155;
+    }
+    .config-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #e2e8f0;
+      border-right: 1px solid #e2e8f0;
+      color: #374151;
+      background-color: #ffffff;
+    }
+    .dark .config-table td {
+      background-color: #1e293b;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    .config-table tr:last-child td {
+      border-bottom: none;
+    }
+    .config-table th:last-child,
+    .config-table td:last-child {
+      border-right: none;
+    }
+  </style>
+</head>
+
+<body class="bg-[#f4f6f8] dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex transition-colors duration-200">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside id="sidebar" class="w-80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-slate-200/60 dark:border-slate-700/60 flex flex-col shrink-0 h-screen sticky top-0 custom-scrollbar overflow-y-auto transition-all duration-300 z-20">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3 sidebar-text">
+        <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
+          <i data-lucide="circle-dot" class="w-5 h-5"></i>
+        </div>
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Auto Repurchase Demo</span>
+      </div>
+    </div>
+
+    <nav class="px-4 pb-6 space-y-6">
+      <div>
+        <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Dashboards</p>
+        <div class="space-y-1">
+          
+          <!-- Dashboard -->
+          <a href="../index.html" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 font-medium text-base transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i>
+              <span class="sidebar-text">Dashboard</span>
+            </div>
+          </a>
+
+          <!-- Associates -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-associate')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Associates</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-associate" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-associate" class="hidden pl-10 pr-3 py-1 space-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../Associate/all-associate.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">All Associates</a>
+              <a href="../Associate/active-associate.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Active Associates</a>
+              <a href="../Associate/inactive-associate.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Inactive Associates</a>
+              <a href="../Associate/rank-table.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Rank Table</a>
+            </div>
+          </div>
+
+          <!-- Income Distribution -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-income-distribution')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Income Distribution</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-income-distribution" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-income-distribution" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../Income-distribution/club-member.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Club Members</a>
+              <a href="../Income-distribution/distribute-income.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Distribute Income</a>
+              <a href="../Income-distribution/distribution-table.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Distribution Table</a>
+            </div>
+          </div>
+
+          <!-- KYC -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-kyc')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">KYC</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-kyc" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-kyc" class="hidden pl-10 pr-3 py-1 space-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../Kyc/pending-kyc.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Pending KYC</a>
+              <a href="../Kyc/accepted-kyc.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Accepted KYC</a>
+              <a href="../Kyc/rejected-kyc.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Rejected KYC</a>
+            </div>
+          </div>
+
+          <!-- Withdrawal -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-ads')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Withdrawal</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-ads" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-ads" class="hidden pl-10 pr-3 py-1 space-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../withdrawal/pending-withdrawal.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Pending Withdrawal</a>
+              <a href="../withdrawal/confirm-withdrawal.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Confirm Withdrawal</a>
+              <a href="../withdrawal/rejected-withdrawal.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Rejected Withdrawal</a>
+              <a href="../withdrawal/total-withdrawal-request.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Total Withdrawal Requests</a>
+            </div>
+          </div>
+
+          <!-- Fund Request -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-fund-transfer')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Fund Request</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-fund-transfer" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-fund-transfer" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../fund-request/pending-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Pending Fund Request</a>
+              <a href="../fund-request/accepted-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Accepted Fund Request</a>
+              <a href="../fund-request/rejected-request.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Rejected Fund Request</a>
+            </div>
+          </div>
+
+          <!-- Generated Payout -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-bonus-request')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="send" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Generated Payout</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-bonus-request" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-bonus-request" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../generated-payout/generated-payout.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Generated Payout</a>
+            </div>
+          </div>
+
+          <!-- Admin Setting (Open state for this page) -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-admin-transaction')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-800 dark:text-slate-100 text-sm font-semibold transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Admin Setting</span>
+              </div>
+              <i data-lucide="chevron-up" id="icon-dash-admin-transaction" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-admin-transaction" class="mt-1 mb-2 pl-10 pr-3 py-1 space-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../Admin-setting/deduction-profit.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Deduction & Profit</a>
+              <!-- Highlighted Current Page -->
+              <a href="../Admin-setting/withdrawal-lock.html" class="block py-1.5 font-semibold text-slate-900 dark:text-white">Withdrawal Lock/Unlock</a>
+              <a href="../Admin-setting/wallet-deduction.html" class="block py-1.5 hover:text-slate-900 dark:hover:text-white transition">Wallet Deduction</a>
+            </div>
+          </div>
+
+          <!-- Add Banner -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-add-banner')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Add Banner</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-add-banner" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-add-banner" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../Add-banner/banner-images.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Banner Images</a>
+              <a href="../Add-banner/delete-banner.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Delete Banner</a>
+            </div>
+          </div>
+
+          <!-- Support -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-support')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Support</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-support" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-support" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../support/help-desk.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Help Desk</a>
+              <a href="../support/reply-history.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Reply History</a>
+            </div>
+          </div>
+
+          <!-- Notice -->
+          <div class="sidebar-dropdown">
+            <button onclick="toggleDropdown('dash-capital-withdrawal')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="banknote" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Notice</span>
+              </div>
+              <i data-lucide="chevron-down" id="icon-dash-capital-withdrawal" class="w-4 h-4 transition-transform duration-200 sidebar-text"></i>
+            </button>
+            <div id="dash-capital-withdrawal" class="hidden pl-10 pr-3 py-1 space-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium sidebar-text">
+              <a href="../notice/dashboard-news.html" class="block py-1.5 hover:text-brand-dark dark:hover:text-brand-light">Dashboard News</a>
+            </div>
+          </div>
+
+          <!-- Update Password -->
+          <div class="sidebar-dropdown">
+            <a href="../update-password.html" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="lock" class="w-4 h-4 shrink-0"></i>
+                <span class="sidebar-text">Update Password</span>
+              </div>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- Header -->
+    <header class="h-16 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-b border-slate-200/60 dark:border-slate-700/60 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
+      <div class="flex items-center space-x-4">
+        <button id="sidebarToggle" onclick="toggleSidebar()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i data-lucide="sidebar" class="w-5 h-5"></i></button>
+        <div class="relative w-64 hidden sm:block"><i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-1.5 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-dark dark:focus:border-brand-light"></div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"><i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i></button>
+        <div class="flex items-center space-x-1 cursor-pointer"><span class="text-xl">🇬🇧</span></div>
+        <button class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg relative transition"><i data-lucide="bell" class="w-5 h-5"></i><span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">6</span></button>
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover cursor-pointer">
+      </div>
+    </header>
+
+    <!-- ============ MAIN DASHBOARD ============ -->
+    <main class="p-6 overflow-y-auto">
+      
+      <!-- Main Container to limit width and center content -->
+      <div class="max-w-4xl space-y-6">
+
+        <!-- Form Card -->
+        <div class="custom-card">
+          
+          <!-- Form Title -->
+          <div class="card-header">
+            Wallet Lock and Unlock
+          </div>
+          
+          <!-- Form Body -->
+          <div class="p-6 space-y-5">
+            
+            <!-- Lock Status -->
+            <div>
+              <label class="form-label">Lock Status</label>
+              <div class="select-wrapper">
+                <select class="form-control">
+                  <option value="" disabled selected>Select Status</option>
+                  <option value="locked">Locked</option>
+                  <option value="unlocked">Unlocked</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Wallet Name -->
+            <div>
+              <label class="form-label">Wallet Name</label>
+              <div class="select-wrapper">
+                <select class="form-control">
+                  <option value="" disabled selected>Select Income</option>
+                  <option value="affiliate">Affiliate Wallet</option>
+                  <option value="fund">Fund Wallet</option>
+                  <option value="trade">Trade Profit Wallet</option>
+                  <option value="principal">Principal Wallet</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Withdraw Allow Date -->
+            <div>
+              <label class="form-label">For Principal Wallet Withdraw Allow Date</label>
+              <input type="date" class="form-control text-slate-500 dark:text-slate-400" />
+            </div>
+
+            <!-- Unlock Percent -->
+            <div>
+              <label class="form-label">For Principal Wallet Unlock Percent (%)</label>
+              <input type="text" class="form-control" placeholder="Unlock Percent" />
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-3 pt-2">
+              <button class="btn-save">Save</button>
+              <button class="btn-reset">Reset</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Data Table Card -->
+        <div class="custom-card">
+          <div class="overflow-x-auto">
+            <table class="config-table">
+              <thead>
+                <tr>
+                  <th>SI</th>
+                  <th>Income Type</th>
+                  <th>Withdraw Date (DD)</th>
+                  <th>Unlock Percent</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td class="font-semibold">Affiliate Wallet</td>
+                  <td>Not Set</td>
+                  <td>Not Set</td>
+                  <td>Unlocked</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td class="font-semibold">Fund Wallet</td>
+                  <td>Not Set</td>
+                  <td>Not Set</td>
+                  <td>Unlocked</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td class="font-semibold">Trade Profit Wallet</td>
+                  <td>Not Set</td>
+                  <td>Not Set</td>
+                  <td>Unlocked</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td class="font-semibold">Principal Wallet</td>
+                  <td>2023-05-06</td>
+                  <td>5 %</td>
+                  <td>Unlocked</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    lucide.createIcons();
+
+    function toggleDropdown(id) {
+      const targetMenu = document.getElementById(id);
+      const targetIcon = document.getElementById('icon-' + id);
+      
+      document.querySelectorAll('.sidebar-dropdown > div').forEach(el => {
+        if (el.id !== id && !el.classList.contains('hidden')) {
+          el.classList.add('hidden');
+          const otherIcon = document.getElementById('icon-' + el.id);
+          if (otherIcon) {
+            otherIcon.style.transform = 'rotate(0deg)';
+            otherIcon.setAttribute('data-lucide', 'chevron-down');
+            lucide.createIcons();
+          }
+        }
+      });
+
+      if (targetMenu.classList.contains('hidden')) {
+        targetMenu.classList.remove('hidden');
+        if (targetIcon) {
+          targetIcon.style.transform = 'rotate(180deg)';
+          targetIcon.setAttribute('data-lucide', 'chevron-up');
+        }
+      } else {
+        targetMenu.classList.add('hidden');
+        if (targetIcon) {
+          targetIcon.style.transform = 'rotate(0deg)';
+          targetIcon.setAttribute('data-lucide', 'chevron-down');
+        }
+      }
+      lucide.createIcons();
+    }
+
+    let isSidebarCollapsed = false;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const textElements = document.querySelectorAll('.sidebar-text');
+      isSidebarCollapsed = !isSidebarCollapsed;
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-20');
+        textElements.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-80');
+        textElements.forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      const themeIcon = document.getElementById('themeIcon');
+      if (isDark) themeIcon.setAttribute('data-lucide', 'sun');
+      else themeIcon.setAttribute('data-lucide', 'moon');
+      lucide.createIcons();
+    }
+  </script>
+
+</body>
+</html>
